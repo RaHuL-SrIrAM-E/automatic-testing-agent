@@ -131,7 +131,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const canvasDimensions = getCanvasDimensions();
 
   return (
-    <div className="w-full h-full glass-panel rounded-2xl border-2 border-dashed border-wf-gray-300 hover:border-wf-red-300 transition-all duration-300 overflow-hidden relative">
+    <div className="w-full h-full rounded-xl border-2 border-dashed border-wf-gray-300 hover:border-wf-red-400 transition-all duration-300 overflow-hidden relative bg-gradient-to-br from-wf-gray-50/50 to-white">
       {/* Scrollable container */}
       <div 
         ref={scrollContainerRef}
@@ -139,11 +139,9 @@ export const Canvas: React.FC<CanvasProps> = ({
         onScroll={handleScroll}
         style={{
           backgroundImage: `
-            radial-gradient(circle at 20px 20px, rgba(220, 38, 38, 0.1) 1px, transparent 1px),
-            radial-gradient(circle at 20px 20px, rgba(245, 158, 11, 0.1) 1px, transparent 1px)
+            radial-gradient(circle at 20px 20px, rgba(220, 38, 38, 0.08) 1px, transparent 1px)
           `,
-          backgroundSize: '40px 40px',
-          backgroundPosition: '0 0, 20px 20px'
+          backgroundSize: '30px 30px'
         }}
       >
         <div
@@ -155,8 +153,8 @@ export const Canvas: React.FC<CanvasProps> = ({
           }}
           className={`relative glass-panel rounded-xl border-2 border-dashed ${
             isOver 
-              ? 'border-wf-red-400 bg-gradient-to-br from-wf-red-50 to-wf-yellow-50 shadow-wf-lg' 
-              : 'border-wf-gray-300 hover:border-wf-red-300'
+              ? 'border-wf-red-500 bg-gradient-to-br from-wf-red-50/80 to-wf-yellow-50/80 shadow-lg' 
+              : 'border-wf-gray-300/50 hover:border-wf-red-400'
           } transition-all duration-300`}
           style={{
             width: canvasDimensions.width,
@@ -169,19 +167,19 @@ export const Canvas: React.FC<CanvasProps> = ({
           {nodes.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center animate-fade-in">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-2xl flex items-center justify-center shadow-wf-lg">
-                  <span className="text-3xl">🎯</span>
+                <div className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-wf-red-500 to-wf-red-600 rounded-3xl flex items-center justify-center shadow-xl">
+                  <span className="text-4xl">🎯</span>
                 </div>
-                <h3 className="text-2xl font-bold text-wf-gray-900 mb-3">
+                <h3 className="text-3xl font-bold text-wf-gray-900 mb-4">
                   Start Building Your Test Flow
                 </h3>
-                <p className="text-wf-gray-600 text-lg mb-6">
+                <p className="text-wf-gray-600 text-lg mb-8 max-w-md mx-auto">
                   Drag components from the left panel to create your Karate test
                 </p>
-                <div className="flex items-center justify-center space-x-2 text-wf-gray-500">
-                  <div className="w-2 h-2 bg-wf-red-500 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-wf-yellow-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-wf-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-3 h-3 bg-wf-red-500 rounded-full animate-pulse"></div>
+                  <div className="w-3 h-3 bg-wf-red-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="w-3 h-3 bg-wf-red-600 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
                 </div>
               </div>
             </div>
@@ -231,13 +229,13 @@ export const Canvas: React.FC<CanvasProps> = ({
             <div className="absolute top-4 right-4 bg-wf-red-600 text-white px-4 py-2 rounded-lg shadow-wf-lg animate-fade-in z-10">
               <div className="flex items-center space-x-2">
                 <Move className="w-4 h-4" />
-                <span className="text-sm font-semibold">Scroll to explore the full flow</span>
+                <span className="text-sm font-medium">Scroll to explore the full flow</span>
               </div>
             </div>
           )}
           
           {/* Scroll position indicator */}
-          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm border border-wf-gray-200 rounded-lg px-3 py-2 shadow-wf text-xs text-wf-gray-600 z-10">
+          <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm border border-wf-gray-200 rounded-lg px-3 py-2 shadow-sm text-xs text-wf-gray-600 z-10">
             <div className="flex items-center space-x-4">
               <span>X: {Math.round(scrollPosition.x)}</span>
               <span>Y: {Math.round(scrollPosition.y)}</span>
@@ -245,7 +243,7 @@ export const Canvas: React.FC<CanvasProps> = ({
           </div>
           
           {/* Canvas size indicator */}
-          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm border border-wf-gray-200 rounded-lg px-3 py-2 shadow-wf text-xs text-wf-gray-600 z-10">
+          <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm border border-wf-gray-200 rounded-lg px-3 py-2 shadow-sm text-xs text-wf-gray-600 z-10">
             <div className="flex items-center space-x-2">
               <span>Canvas: {canvasDimensions.width} × {canvasDimensions.height}</span>
             </div>

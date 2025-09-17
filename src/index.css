@@ -16,65 +16,53 @@
 
 @layer components {
   .component-card {
-    @apply bg-white border border-wf-gray-200 rounded-xl p-4 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer;
-    @apply hover:border-wf-red-500 hover:scale-105 hover:bg-gradient-to-br hover:from-wf-red-50 hover:to-wf-yellow-50;
+    @apply bg-white border border-wf-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer;
+    @apply hover:border-wf-red-400 hover:scale-[1.02] hover:bg-gradient-to-br hover:from-wf-red-50/50 hover:to-wf-yellow-50/50;
   }
   
   .component-card:hover {
-    @apply border-wf-red-500 shadow-wf-red-100;
+    @apply border-wf-red-400;
   }
   
   .component-card .icon {
-    @apply transition-all duration-300 group-hover:scale-110;
+    @apply transition-all duration-200 group-hover:scale-105;
   }
   
   .canvas-node {
-    @apply bg-white border-2 border-wf-gray-300 rounded-xl p-4 shadow-lg min-w-[200px] cursor-move transition-all duration-300;
-    @apply hover:border-wf-red-400 hover:shadow-xl hover:scale-105;
+    @apply bg-white border-2 border-wf-gray-300 rounded-xl p-4 shadow-md min-w-[200px] cursor-move transition-all duration-200;
+    @apply hover:border-wf-red-400 hover:shadow-lg hover:scale-[1.02];
   }
   
   .canvas-node.selected {
-    @apply border-wf-red-500 shadow-xl ring-4 ring-wf-red-100 scale-105;
+    @apply border-wf-red-500 shadow-lg ring-2 ring-wf-red-200 scale-[1.02];
   }
   
   .canvas-node:hover {
-    @apply border-wf-red-400 shadow-xl;
+    @apply border-wf-red-400 shadow-lg;
   }
   
   .property-input {
-    @apply w-full px-4 py-3 border border-wf-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-red-500 focus:border-wf-red-500 transition-all duration-200;
+    @apply w-full px-4 py-3 border border-wf-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-red-500 focus:border-wf-red-500 transition-all duration-200 bg-white;
     @apply hover:border-wf-red-300;
   }
   
   .property-label {
-    @apply block text-sm font-semibold text-wf-gray-700 mb-2;
+    @apply block text-sm font-medium text-wf-gray-700 mb-2;
   }
   
   .btn-primary {
-    @apply bg-wf-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    @apply hover:bg-wf-red-700 hover:shadow-lg hover:scale-105 active:scale-95;
+    @apply bg-wf-red-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    @apply hover:bg-wf-red-700 hover:shadow-md active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-wf-yellow-500 text-wf-gray-900 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    @apply hover:bg-wf-yellow-600 hover:shadow-lg hover:scale-105 active:scale-95;
+    @apply bg-wf-yellow-500 text-wf-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    @apply hover:bg-wf-yellow-600 hover:shadow-md active:scale-95;
   }
   
   .btn-outline {
-    @apply border-2 border-wf-red-600 text-wf-red-600 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    @apply hover:bg-wf-red-600 hover:text-white hover:shadow-lg hover:scale-105 active:scale-95;
-  }
-  
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-sm border border-wf-gray-200 rounded-xl shadow-lg;
-  }
-  
-  .gradient-bg {
-    @apply bg-gradient-to-br from-wf-red-50 via-white to-wf-yellow-50;
-  }
-  
-  .text-gradient {
-    @apply bg-gradient-to-r from-wf-red-600 to-wf-yellow-600 bg-clip-text text-transparent;
+    @apply border border-wf-red-600 text-wf-red-600 px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    @apply hover:bg-wf-red-600 hover:text-white hover:shadow-md active:scale-95;
   }
 
   /* Custom Scrollbar */
@@ -92,5 +80,21 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply from-wf-red-600 to-wf-yellow-600;
+  }
+
+  /* New animations */
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 }

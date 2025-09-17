@@ -20,36 +20,36 @@ export const ExampleFlow: React.FC<ExampleFlowProps> = ({ onLoadFlow }) => {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-r from-wf-red-50 to-wf-yellow-50 border border-wf-red-200 rounded-xl shadow-wf animate-fade-in">
+    <div className="bg-gradient-to-r from-wf-red-50 to-wf-yellow-50 border border-wf-red-200 rounded-xl shadow-sm animate-fade-in">
       <div className="flex items-center space-x-4 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-xl flex items-center justify-center shadow-wf">
+        <div className="w-10 h-10 bg-gradient-to-br from-wf-red-500 to-wf-red-600 rounded-xl flex items-center justify-center shadow-sm">
           <span className="text-2xl">🚀</span>
         </div>
         <div>
-          <h3 className="text-xl font-bold text-wf-gray-900">Quick Start</h3>
-          <p className="text-wf-gray-700">Try these demo flows to see how it works</p>
+          <h3 className="text-lg font-bold text-wf-gray-900">Quick Start</h3>
+          <p className="text-sm text-wf-gray-700">Try demo flows</p>
         </div>
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         <button
           onClick={handleLoadBasicDemo}
-          className="w-full btn-primary flex items-center justify-center space-x-3"
+          className="w-full px-4 py-3 bg-wf-red-600 text-white rounded-lg hover:bg-wf-red-700 transition-all duration-200 flex items-center space-x-3 text-sm font-medium"
         >
           <span className="text-lg">🌐</span>
           <div className="text-left">
-            <div className="font-semibold">Basic API Test</div>
+            <div className="font-medium">Basic API Test</div>
             <div className="text-xs opacity-90">GET request with auth & validation</div>
           </div>
         </button>
         
         <button
           onClick={handleLoadSequentialDemo}
-          className="w-full btn-secondary flex items-center justify-center space-x-3"
+          className="w-full px-4 py-3 bg-wf-yellow-500 text-wf-gray-900 rounded-lg hover:bg-wf-yellow-600 transition-all duration-200 flex items-center space-x-3 text-sm font-medium"
         >
           <span className="text-lg">📅</span>
           <div className="text-left">
-            <div className="font-semibold">Sequential Workflow</div>
+            <div className="font-medium">Sequential Workflow</div>
             <div className="text-xs opacity-90">Timeslots → Book → Cancel</div>
           </div>
         </button>

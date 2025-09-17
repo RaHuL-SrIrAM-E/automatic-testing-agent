@@ -80,17 +80,17 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
   };
 
   return (
-    <div className="mb-8 animate-slide-up">
-      <div className="flex items-center space-x-3 mb-4">
-        <div className="w-8 h-8 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-lg flex items-center justify-center">
+    <div className="mb-6 animate-slide-up">
+      <div className="flex items-center space-x-3 mb-3 px-6">
+        <div className="w-6 h-6 bg-gradient-to-br from-wf-red-500 to-wf-red-600 rounded-lg flex items-center justify-center">
           <span className="text-lg">{getCategoryIcon(category)}</span>
         </div>
-        <h3 className="text-lg font-bold text-wf-gray-900">
+        <h3 className="text-sm font-bold text-wf-gray-900 uppercase tracking-wide">
           {title}
         </h3>
-        <div className="flex-1 h-px bg-gradient-to-r from-wf-red-200 to-wf-yellow-200"></div>
+        <div className="flex-1 h-px bg-wf-gray-200"></div>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2 px-6">
         {components.map((definition, index) => (
           <div key={definition.type} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
             <ComponentCard definition={definition} />
@@ -103,7 +103,7 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
 
 export const ComponentPalette: React.FC = () => {
   return (
-    <div className="p-4 space-y-6">
+    <div className="py-4 space-y-4">
       <CategorySection category="HTTP_REQUEST" title="HTTP Requests" />
       <CategorySection category="AUTHENTICATION" title="Authentication" />
       <CategorySection category="VALIDATION" title="Validation" />
