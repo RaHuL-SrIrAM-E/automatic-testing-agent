@@ -86,49 +86,49 @@ function App() {
     <DndProvider backend={HTML5Backend}>
       <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 flex flex-col overflow-hidden">
         {/* Ultra Modern Header */}
-        <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm relative z-50">
+        <header className="bg-gradient-to-r from-wf-red-600 to-wf-red-700 backdrop-blur-xl border-b border-wf-red-800/50 shadow-lg relative z-50">
           <div className="px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setShowSidebar(!showSidebar)}
-                  className="p-2.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 hover:scale-105"
+                  className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 hover:scale-105"
                 >
                   {showSidebar ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-red-600 via-red-700 to-red-800 rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden border border-white/30">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                     <span className="text-white font-bold text-xl relative z-10">K</span>
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
+                    <h1 className="text-2xl font-bold text-white">
                       Karate Visual Builder
                     </h1>
-                    <p className="text-sm text-gray-500 font-medium">Professional API Testing Suite</p>
+                    <p className="text-sm text-white/80 font-medium">Professional API Testing Suite</p>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
-                <div className="flex items-center bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-1 shadow-inner">
+                <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-xl p-1 shadow-inner border border-white/30">
                   <div className="flex items-center space-x-2 px-3 py-2">
-                    <Layers className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-semibold text-gray-700">{flowState.nodes.length}</span>
-                    <span className="text-xs text-gray-500">Components</span>
+                    <Layers className="w-4 h-4 text-white/90" />
+                    <span className="text-sm font-semibold text-white">{flowState.nodes.length}</span>
+                    <span className="text-xs text-white/80">Components</span>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <button className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 flex items-center space-x-2">
+                  <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
                     <Play className="w-4 h-4" />
                     <span>Run</span>
                   </button>
-                  <button className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-xl transition-all duration-200 flex items-center space-x-2">
+                  <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
                     <Download className="w-4 h-4" />
                     <span>Export</span>
                   </button>
-                  <button className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2">
+                  <button className="px-6 py-2.5 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-white/30">
                     <Zap className="w-4 h-4" />
                     <span>Generate</span>
                   </button>

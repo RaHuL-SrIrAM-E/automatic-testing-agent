@@ -22,7 +22,7 @@ export const ExampleFlow: React.FC<ExampleFlowProps> = ({ onLoadFlow }) => {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center space-x-4 mb-6">
-        <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
+        <div className="w-8 h-8 bg-gradient-to-br from-wf-yellow-500 to-wf-yellow-600 rounded-lg flex items-center justify-center shadow-sm">
           <span className="text-2xl">🚀</span>
         </div>
         <div>

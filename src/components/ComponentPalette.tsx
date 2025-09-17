@@ -18,17 +18,17 @@ const ComponentCard: React.FC<{ definition: any }> = ({ definition }) => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'HTTP_REQUEST':
-        return 'from-red-500 to-red-600';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
       case 'AUTHENTICATION':
-        return 'from-yellow-500 to-yellow-600';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
       case 'VALIDATION':
-        return 'from-red-600 to-red-700';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
       case 'DATA_MANAGEMENT':
-        return 'from-yellow-600 to-yellow-700';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
       case 'CONTROL_FLOW':
-        return 'from-gray-500 to-gray-600';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
       default:
-        return 'from-gray-400 to-gray-500';
+        return 'from-wf-yellow-500 to-wf-yellow-600';
     }
   };
 
@@ -82,7 +82,7 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
   return (
     <div className="mb-4 animate-slide-up">
       <div className="flex items-center space-x-3 mb-3 px-4">
-        <div className="w-5 h-5 bg-gradient-to-br from-red-500 to-red-600 rounded-md flex items-center justify-center">
+        <div className="w-5 h-5 bg-gradient-to-br from-wf-yellow-500 to-wf-yellow-600 rounded-md flex items-center justify-center">
           <span className="text-sm">{getCategoryIcon(category)}</span>
         </div>
         <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">
