@@ -61,7 +61,33 @@ npm start
 1. **Drag Components**: Drag components from the left palette to the canvas
 2. **Configure Properties**: Click on a component to configure its properties in the right panel
 3. **View Generated Code**: See the live Karate code generation in the bottom panel
-4. **Export**: Download the generated `.feature` file
+4. **Export**: Download the generated `.feature` file OR generate a complete project
+
+### Two Output Modes
+
+#### 1. Feature File Mode (Original)
+- Generates single `.feature` files
+- Perfect for quick API tests
+- Copy-paste into existing Karate projects
+
+#### 2. Complete Project Mode (New!)
+- Generates full Maven project structure
+- Ready-to-run with one command
+- Includes all configuration files, test data, and documentation
+
+### Running Generated Projects
+
+#### Quick Start (One Command):
+```bash
+# After downloading and extracting the project
+chmod +x setup.sh && ./setup.sh
+```
+
+#### Manual Setup:
+```bash
+# Install Java 11+ and Maven, then:
+mvn clean test
+```
 
 ### Example Generated Code
 
