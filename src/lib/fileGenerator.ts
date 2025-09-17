@@ -1,7 +1,8 @@
 import { KarateProject } from './karateProjectGenerator';
+import JSZip from 'jszip';
 
 export class FileGenerator {
-  static generateProjectZip(project: KarateProject): void {
+  static async generateProjectZip(project: KarateProject): Promise<void> {
     // Create a ZIP file with all the project files
     const files: { path: string; content: string }[] = [];
     
@@ -44,7 +45,7 @@ export class FileGenerator {
     });
 
     // Create ZIP file
-    this.downloadAsZip(project.name, files);
+    await this.downloadAsZip(project.name, files);
   }
 
   private static generateReadme(project: KarateProject): string {
@@ -204,10 +205,50 @@ fi
     return result;
   }
 
-  private static downloadAsZip(projectName: string, files: { path: string; content: string }[]): void {
-    console.log('Starting download process...');
+  private static async downloadAsZip(projectName: string, files: { path: string; content: string }[]): Promise<void> {
+    console.log('Starting ZIP creation process...');
     console.log('Project name:', projectName);
     console.log('Number of files:', files.length);
+    
+    try {
+      // Create a new JSZip instance
+      const zip = new JSZip();
+      
+      console.log('Adding files to ZIP...');
+      // Add all files to the ZIP with their proper folder structure
+      files.forEach(file => {
+        console.log(`Adding file: ${file.path}`);
+        zip.file(file.path, file.content);
+      });
+      
+      console.log('Generating ZIP file...');
+      // Generate the ZIP file
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      
+      console.log('Creating download URL...');
+      const url = URL.createObjectURL(zipBlob);
+      
+      console.log('Creating download link...');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${projectName}.zip`;
+      
+      console.log('Triggering download...');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log('ZIP download completed!');
+    } catch (error) {
+      console.error('Error creating ZIP file:', error);
+      // Fallback to JSON download if ZIP fails
+      this.downloadAsJson(projectName, files);
+    }
+  }
+
+  private static downloadAsJson(projectName: string, files: { path: string; content: string }[]): void {
+    console.log('Falling back to JSON download...');
     
     // Create a structured project file that can be easily extracted
     const projectStructure = {
@@ -225,25 +266,20 @@ fi
       }
     };
 
-    console.log('Creating blob...');
     const blob = new Blob([JSON.stringify(projectStructure, null, 2)], { 
       type: 'application/json' 
     });
     
-    console.log('Creating download URL...');
     const url = URL.createObjectURL(blob);
-    
-    console.log('Creating download link...');
     const a = document.createElement('a');
     a.href = url;
     a.download = `${projectName}-project.json`;
     
-    console.log('Triggering download...');
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    console.log('Download process completed!');
+    console.log('JSON download completed!');
   }
 }

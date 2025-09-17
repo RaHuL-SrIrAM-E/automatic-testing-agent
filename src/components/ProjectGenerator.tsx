@@ -24,9 +24,9 @@ export const ProjectGenerator: React.FC<ProjectGeneratorProps> = ({ nodes }) => 
       setGeneratedProject(project);
       
       // Automatically trigger download after generation
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log('Auto-downloading project...');
-        FileGenerator.generateProjectZip(project);
+        await FileGenerator.generateProjectZip(project);
       }, 500);
     } catch (error) {
       console.error('Error generating project:', error);
@@ -36,7 +36,7 @@ export const ProjectGenerator: React.FC<ProjectGeneratorProps> = ({ nodes }) => 
     }
   };
 
-  const handleDownloadProject = () => {
+  const handleDownloadProject = async () => {
     if (!generatedProject) {
       console.error('No project generated yet');
       return;
@@ -44,8 +44,8 @@ export const ProjectGenerator: React.FC<ProjectGeneratorProps> = ({ nodes }) => 
 
     try {
       console.log('Downloading project:', generatedProject.name);
-      // Generate and download as project file
-      FileGenerator.generateProjectZip(generatedProject);
+      // Generate and download as ZIP file
+      await FileGenerator.generateProjectZip(generatedProject);
       console.log('Download initiated');
     } catch (error) {
       console.error('Error downloading project:', error);
@@ -187,7 +187,7 @@ Scenario: User Test Flow
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
           <h4 className="text-sm font-medium text-blue-900 mb-2">How to Run Generated Project:</h4>
           <div className="text-xs text-blue-800 space-y-1">
-            <p>1. <strong>Download the project</strong> (ZIP file)</p>
+            <p>1. <strong>Download the ZIP file</strong> (auto-downloads after generation)</p>
             <p>2. <strong>Extract the ZIP</strong> to a folder</p>
             <p>3. <strong>Open terminal</strong> in the project folder</p>
             <p>4. <strong>Run:</strong> <code className="bg-blue-100 px-1 rounded">chmod +x setup.sh && ./setup.sh</code></p>
