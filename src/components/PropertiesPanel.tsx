@@ -132,17 +132,22 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (!selectedNode) {
     return (
-      <div className="p-4">
+      <div className="p-6">
         <div className="text-center text-gray-500 animate-fade-in">
-          <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-red-100 to-yellow-100 rounded-xl flex items-center justify-center">
-            <span className="text-3xl">⚙️</span>
+          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-red-100 to-yellow-100 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-4xl">⚙️</span>
           </div>
-          <h3 className="text-base font-bold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
             No Component Selected
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 leading-relaxed">
             Click on a component in the canvas to configure its properties
           </p>
+          <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-yellow-50 rounded-xl border border-red-100">
+            <p className="text-xs text-gray-600">
+              💡 <strong>Tip:</strong> Drag components from the left panel to the canvas to get started
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -151,27 +156,27 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const definition = getComponentDefinition(selectedNode.type);
   if (!definition) {
     return (
-      <div className="p-4">
+      <div className="p-6">
         <div className="text-center text-gray-500 animate-fade-in">
-          <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-red-100 to-yellow-100 rounded-xl flex items-center justify-center">
-            <span className="text-3xl">❌</span>
+          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-red-100 to-yellow-100 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-4xl">❌</span>
           </div>
-          <h3 className="text-base font-bold text-gray-900 mb-2">Unknown Component</h3>
-          <p className="text-sm text-gray-600">This component type is not recognized</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Unknown Component</h3>
+          <p className="text-sm text-gray-600 leading-relaxed">This component type is not recognized</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 animate-fade-in">
-      <div className="mb-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+    <div className="p-6 animate-fade-in">
+      <div className="mb-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-lg text-white">{definition.icon}</span>
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-lg font-bold text-gray-900">
               {definition.name}
             </h3>
             <p className="text-sm text-gray-600">
@@ -181,7 +186,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {definition.properties.map((property) => (
           <div key={property.key}>
             <label className="property-label">
@@ -201,9 +206,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </div>
 
       {/* Component Info */}
-      <div className="mt-4 pt-4 border-t border-gray-200/60">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">Component Info</h4>
-        <div className="text-xs text-gray-500 space-y-1">
+      <div className="mt-8 pt-6 border-t border-gray-200/60">
+        <h4 className="text-sm font-bold text-gray-900 mb-3">Component Info</h4>
+        <div className="text-xs text-gray-500 space-y-2 bg-gray-50/50 p-3 rounded-lg">
           <div>Type: {selectedNode.type}</div>
           <div>ID: {selectedNode.id}</div>
           <div>Position: ({Math.round(selectedNode.position.x)}, {Math.round(selectedNode.position.y)})</div>

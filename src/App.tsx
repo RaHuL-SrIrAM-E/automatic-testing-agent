@@ -140,7 +140,7 @@ function App() {
 
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Compact & Modern */}
-          <div className={`${showSidebar ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white/60 backdrop-blur-xl border-r border-gray-200/50 flex flex-col relative z-40`}>
+          <div className={`${showSidebar ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white/60 backdrop-blur-xl border-r border-gray-200/50 flex flex-col relative z-40 h-full`}>
             {showSidebar && (
               <>
                 {/* Demo Section - Compact */}
@@ -166,9 +166,9 @@ function App() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {/* Canvas Area - Optimized Size */}
-            <div className={`flex-1 p-4 transition-all duration-300 ${showProperties ? 'mr-80' : ''}`}>
+            <div className="h-96 p-4 transition-all duration-300">
               <div className="h-full bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden relative">
                 <Canvas
                   nodes={flowState.nodes}
@@ -183,7 +183,7 @@ function App() {
             </div>
             
             {/* Bottom Panel - Compact Tabs */}
-            <div className="h-72 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
+            <div className="flex-1 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg overflow-hidden">
               <div className="h-full flex flex-col">
                 {/* Modern Tab Navigation */}
                 <div className="flex border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
@@ -229,39 +229,36 @@ function App() {
             </div>
           </div>
 
-          {/* Right Sidebar - Properties Panel */}
-          {showProperties && selectedNode && (
-            <div className="w-80 bg-white/80 backdrop-blur-xl border-l border-gray-200/50 shadow-xl flex flex-col animate-slide-in-right relative z-30">
-              <div className="p-4 border-b border-gray-200/50 bg-gradient-to-r from-yellow-50/80 to-red-50/80">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
-                      <Settings className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900">Properties</h2>
-                      <p className="text-sm text-gray-600">Configure component</p>
-                    </div>
+          {/* Right Sidebar - Properties Panel - Always Visible */}
+          <div className="w-80 bg-white/80 backdrop-blur-xl border-l border-gray-200/50 shadow-xl flex flex-col relative z-30 h-full">
+            <div className="p-4 border-b border-gray-200/50 bg-gradient-to-r from-yellow-50/80 to-red-50/80">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
+                    <Settings className="w-5 h-5 text-white" />
                   </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">Properties</h2>
+                    <p className="text-sm text-gray-600">Configure component</p>
+                  </div>
+                </div>
+                {selectedNode && (
                   <button
-                    onClick={() => {
-                      selectNode(null);
-                      setShowProperties(false);
-                    }}
+                    onClick={() => selectNode(null)}
                     className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                   >
                     <X className="w-4 h-4" />
                   </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <PropertiesPanel
-                  selectedNode={selectedNode}
-                  onNodeUpdate={updateNode}
-                />
+                )}
               </div>
             </div>
-          )}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <PropertiesPanel
+                selectedNode={selectedNode}
+                onNodeUpdate={updateNode}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </DndProvider>

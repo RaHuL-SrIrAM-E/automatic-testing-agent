@@ -116,15 +116,15 @@ export const Canvas: React.FC<CanvasProps> = ({
   // Calculate canvas dimensions based on node positions
   const getCanvasDimensions = () => {
     if (nodes.length === 0) {
-      return { width: 800, height: 600 };
+      return { width: 600, height: 400 };
     }
     
-    const maxX = Math.max(...nodes.map(node => node.position.x + 300));
-    const maxY = Math.max(...nodes.map(node => node.position.y + 200));
+    const maxX = Math.max(...nodes.map(node => node.position.x + 250));
+    const maxY = Math.max(...nodes.map(node => node.position.y + 150));
     
     return {
-      width: Math.max(maxX + 100, 800), // Minimum 800px width
-      height: Math.max(maxY + 100, 600)  // Minimum 600px height
+      width: Math.max(maxX + 100, 600), // Minimum 600px width
+      height: Math.max(maxY + 100, 400)  // Minimum 400px height
     };
   };
 
@@ -157,10 +157,10 @@ export const Canvas: React.FC<CanvasProps> = ({
               : 'border-gray-300/40 hover:border-red-400/60'
           } transition-all duration-300`}
           style={{
-            width: Math.max(canvasDimensions.width, 800),
-            height: Math.max(canvasDimensions.height, 600),
-            minWidth: '800px',
-            minHeight: '600px'
+            width: Math.max(canvasDimensions.width, 600),
+            height: Math.max(canvasDimensions.height, 400),
+            minWidth: '600px',
+            minHeight: '400px'
           }}
           onClick={handleCanvasClick}
         >
