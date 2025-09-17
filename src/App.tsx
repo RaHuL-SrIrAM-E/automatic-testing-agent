@@ -22,7 +22,6 @@ function App() {
   const [flowState, setFlowState] = useState<FlowState>(initialFlowState);
   const [activeTab, setActiveTab] = useState<'feature' | 'project'>('feature');
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showProperties, setShowProperties] = useState(false);
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
 
   const updateFlowState = useCallback((updates: Partial<FlowState>) => {
@@ -58,7 +57,6 @@ function App() {
       selectedNodeId: flowState.selectedNodeId === nodeId ? null : flowState.selectedNodeId
     });
     if (flowState.selectedNodeId === nodeId) {
-      setShowProperties(false);
     }
   }, [flowState.nodes, flowState.selectedNodeId, updateFlowState]);
 
@@ -66,7 +64,6 @@ function App() {
     updateFlowState({
       selectedNodeId: nodeId
     });
-    setShowProperties(!!nodeId);
   }, [updateFlowState]);
 
   const loadFlow = useCallback((loadedFlowState: FlowState) => {
@@ -75,8 +72,29 @@ function App() {
       generatedCode: karateGenerator.generateFeature(loadedFlowState.nodes, loadedFlowState.connections),
       selectedNodeId: null
     });
-    setShowProperties(false);
   }, [karateGenerator]);
+
+  const handlePostmanImport = useCallback((nodes: ComponentNode[], collectionName: string) => {
+    const newFlowState: FlowState = {
+      nodes: [...flowState.nodes, ...nodes],
+      connections: flowState.connections,
+      selectedNodeId: null,
+      generatedCode: ''
+    };
+    
+    // Regenerate code with new nodes
+    newFlowState.generatedCode = karateGenerator.generateFeature(newFlowState.nodes, newFlowState.connections);
+    
+    setFlowState(newFlowState);
+    
+    // Show success message
+    console.log(`Successfully imported ${nodes.length} requests from "${collectionName}"`);
+  }, [flowState.nodes, flowState.connections, karateGenerator]);
+
+  const handlePostmanError = useCallback((error: string) => {
+    console.error('Postman import error:', error);
+    // You could add a toast notification here
+  }, []);
 
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
@@ -159,7 +177,10 @@ function App() {
                     </div>
                     <p className="text-sm text-gray-600">Drag to canvas to build your flow</p>
                   </div>
-                  <ComponentPalette />
+                  <ComponentPalette 
+                    onImportPostman={handlePostmanImport}
+                    onPostmanError={handlePostmanError}
+                  />
                 </div>
               </>
             )}

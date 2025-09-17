@@ -1,4 +1,4 @@
-import { ComponentNode, ComponentConnection, FlowState } from '../types';
+import { ComponentNode, FlowState } from '../types';
 
 export const generateNodeId = (): string => {
   return `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

@@ -4,7 +4,7 @@ import { ComponentNode, DragItem, ComponentConnection } from '../types';
 import { getComponentDefinition } from '../lib/componentDefinitions';
 import { CanvasNode } from './CanvasNode';
 import { Connection } from './Connection';
-import { Move, ZoomIn, ZoomOut } from 'lucide-react';
+import { Move } from 'lucide-react';
 
 interface CanvasProps {
   nodes: ComponentNode[];

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { getComponentsByCategory } from '../lib/componentDefinitions';
-import { DragItem } from '../types';
+import { DragItem, ComponentNode } from '../types';
+import { PostmanImporter } from './PostmanImporter';
 
 const ComponentCard: React.FC<{ definition: any }> = ({ definition }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -101,9 +102,54 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
   );
 };
 
-export const ComponentPalette: React.FC = () => {
+interface ComponentPaletteProps {
+  onImportPostman?: (nodes: ComponentNode[], collectionName: string) => void;
+  onPostmanError?: (error: string) => void;
+}
+
+export const ComponentPalette: React.FC<ComponentPaletteProps> = ({
+  onImportPostman,
+  onPostmanError
+}) => {
+  const [showPostmanImporter, setShowPostmanImporter] = useState(false);
+
+  const handlePostmanImport = (nodes: ComponentNode[], collectionName: string) => {
+    if (onImportPostman) {
+      onImportPostman(nodes, collectionName);
+    }
+    setShowPostmanImporter(false);
+  };
+
+  const handlePostmanError = (error: string) => {
+    if (onPostmanError) {
+      onPostmanError(error);
+    }
+  };
+
   return (
     <div className="py-3 space-y-3">
+      {/* Postman Import Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+            Import
+          </h3>
+          <button
+            onClick={() => setShowPostmanImporter(!showPostmanImporter)}
+            className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
+          >
+            {showPostmanImporter ? 'Hide' : 'Show'} Postman
+          </button>
+        </div>
+        
+        {showPostmanImporter && (
+          <PostmanImporter
+            onImportComplete={handlePostmanImport}
+            onError={handlePostmanError}
+          />
+        )}
+      </div>
+
       <CategorySection category="HTTP_REQUEST" title="HTTP Requests" />
       <CategorySection category="AUTHENTICATION" title="Authentication" />
       <CategorySection category="VALIDATION" title="Validation" />
