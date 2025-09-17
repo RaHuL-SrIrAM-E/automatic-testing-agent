@@ -18,17 +18,17 @@ const ComponentCard: React.FC<{ definition: any }> = ({ definition }) => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'HTTP_REQUEST':
-        return 'from-wf-red-500 to-wf-red-600';
+        return 'from-red-500 to-red-600';
       case 'AUTHENTICATION':
-        return 'from-wf-yellow-500 to-wf-yellow-600';
+        return 'from-yellow-500 to-yellow-600';
       case 'VALIDATION':
-        return 'from-wf-red-600 to-wf-red-700';
+        return 'from-red-600 to-red-700';
       case 'DATA_MANAGEMENT':
-        return 'from-wf-yellow-600 to-wf-yellow-700';
+        return 'from-yellow-600 to-yellow-700';
       case 'CONTROL_FLOW':
-        return 'from-wf-gray-500 to-wf-gray-600';
+        return 'from-gray-500 to-gray-600';
       default:
-        return 'from-wf-gray-400 to-wf-gray-500';
+        return 'from-gray-400 to-gray-500';
     }
   };
 
@@ -38,18 +38,18 @@ const ComponentCard: React.FC<{ definition: any }> = ({ definition }) => {
       className={`component-card group ${isDragging ? 'opacity-50 scale-95' : ''} animate-fade-in`}
     >
       <div className="flex items-center space-x-4">
-        <div className={`w-12 h-12 bg-gradient-to-br ${getCategoryColor(definition.category)} rounded-xl flex items-center justify-center shadow-wf icon`}>
-          <span className="text-2xl text-white">{definition.icon}</span>
+        <div className={`w-10 h-10 bg-gradient-to-br ${getCategoryColor(definition.category)} rounded-lg flex items-center justify-center shadow-lg icon`}>
+          <span className="text-lg text-white">{definition.icon}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-wf-gray-900 truncate">
+          <h3 className="text-sm font-bold text-gray-900 truncate">
             {definition.name}
           </h3>
-          <p className="text-xs text-wf-gray-600 truncate">
+          <p className="text-xs text-gray-600 truncate">
             {definition.description}
           </p>
-          <div className="mt-1">
-            <span className="inline-block px-2 py-1 text-xs font-medium bg-wf-gray-100 text-wf-gray-700 rounded-full">
+          <div className="mt-1.5">
+            <span className="inline-block px-2 py-0.5 text-xs font-medium bg-gray-100/80 text-gray-700 rounded-full">
               {definition.category.replace('_', ' ')}
             </span>
           </div>
@@ -80,17 +80,17 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
   };
 
   return (
-    <div className="mb-6 animate-slide-up">
-      <div className="flex items-center space-x-3 mb-3 px-6">
-        <div className="w-6 h-6 bg-gradient-to-br from-wf-red-500 to-wf-red-600 rounded-lg flex items-center justify-center">
-          <span className="text-lg">{getCategoryIcon(category)}</span>
+    <div className="mb-4 animate-slide-up">
+      <div className="flex items-center space-x-3 mb-3 px-4">
+        <div className="w-5 h-5 bg-gradient-to-br from-red-500 to-red-600 rounded-md flex items-center justify-center">
+          <span className="text-sm">{getCategoryIcon(category)}</span>
         </div>
-        <h3 className="text-sm font-bold text-wf-gray-900 uppercase tracking-wide">
+        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">
           {title}
         </h3>
-        <div className="flex-1 h-px bg-wf-gray-200"></div>
+        <div className="flex-1 h-px bg-gray-200/60"></div>
       </div>
-      <div className="space-y-2 px-6">
+      <div className="space-y-2 px-4">
         {components.map((definition, index) => (
           <div key={definition.type} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
             <ComponentCard definition={definition} />
@@ -103,7 +103,7 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
 
 export const ComponentPalette: React.FC = () => {
   return (
-    <div className="py-4 space-y-4">
+    <div className="py-3 space-y-3">
       <CategorySection category="HTTP_REQUEST" title="HTTP Requests" />
       <CategorySection category="AUTHENTICATION" title="Authentication" />
       <CategorySection category="VALIDATION" title="Validation" />
