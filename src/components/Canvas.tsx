@@ -116,15 +116,15 @@ export const Canvas: React.FC<CanvasProps> = ({
   // Calculate canvas dimensions based on node positions
   const getCanvasDimensions = () => {
     if (nodes.length === 0) {
-      return { width: '100%', height: '100%' };
+      return { width: 800, height: 600 };
     }
     
     const maxX = Math.max(...nodes.map(node => node.position.x + 300));
     const maxY = Math.max(...nodes.map(node => node.position.y + 200));
     
     return {
-      width: Math.max(maxX + 100, 1200), // Minimum 1200px width
-      height: Math.max(maxY + 100, 800)  // Minimum 800px height
+      width: Math.max(maxX + 100, 800), // Minimum 800px width
+      height: Math.max(maxY + 100, 600)  // Minimum 600px height
     };
   };
 
