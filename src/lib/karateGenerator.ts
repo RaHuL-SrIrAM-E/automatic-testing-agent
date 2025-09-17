@@ -1,24 +1,22 @@
-import { ComponentNode } from '../types';
+import { ComponentNode, ComponentConnection } from '../types';
 
 export class KarateGenerator {
   private variables: Map<string, any> = new Map();
   private generatedSteps: string[] = [];
 
-  generateFeature(nodes: ComponentNode[]): string {
+  generateFeature(nodes: ComponentNode[], connections: ComponentConnection[] = []): string {
     this.variables.clear();
     this.generatedSteps = [];
 
-    // Sort nodes by position to maintain flow order
-    const sortedNodes = [...nodes].sort((a, b) => {
-      if (a.position.y !== b.position.y) {
-        return a.position.y - b.position.y;
-      }
-      return a.position.x - b.position.x;
-    });
+    // Build dependency graph from connections
+    const dependencyGraph = this.buildDependencyGraph(nodes, connections);
+    
+    // Topological sort to determine execution order
+    const sortedNodes = this.topologicalSort(nodes, dependencyGraph);
 
-    // Generate steps for each node
+    // Generate steps for each node in dependency order
     for (const node of sortedNodes) {
-      this.generateNodeCode(node);
+      this.generateNodeCode(node, connections);
     }
 
     // Build the complete feature file
@@ -31,7 +29,59 @@ Scenario: ${scenarioName}
 ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
-  private generateNodeCode(node: ComponentNode): void {
+  private buildDependencyGraph(nodes: ComponentNode[], connections: ComponentConnection[]): Map<string, string[]> {
+    const graph = new Map<string, string[]>();
+    
+    // Initialize graph with all nodes
+    nodes.forEach(node => {
+      graph.set(node.id, []);
+    });
+    
+    // Add dependencies from connections
+    connections.forEach(connection => {
+      const dependencies = graph.get(connection.toNodeId) || [];
+      dependencies.push(connection.fromNodeId);
+      graph.set(connection.toNodeId, dependencies);
+    });
+    
+    return graph;
+  }
+
+  private topologicalSort(nodes: ComponentNode[], dependencyGraph: Map<string, string[]>): ComponentNode[] {
+    const visited = new Set<string>();
+    const visiting = new Set<string>();
+    const result: ComponentNode[] = [];
+    
+    const visit = (nodeId: string) => {
+      if (visiting.has(nodeId)) {
+        throw new Error(`Circular dependency detected involving node ${nodeId}`);
+      }
+      if (visited.has(nodeId)) {
+        return;
+      }
+      
+      visiting.add(nodeId);
+      const dependencies = dependencyGraph.get(nodeId) || [];
+      dependencies.forEach(depId => visit(depId));
+      visiting.delete(nodeId);
+      visited.add(nodeId);
+      
+      const node = nodes.find(n => n.id === nodeId);
+      if (node) {
+        result.push(node);
+      }
+    };
+    
+    nodes.forEach(node => {
+      if (!visited.has(node.id)) {
+        visit(node.id);
+      }
+    });
+    
+    return result;
+  }
+
+  private generateNodeCode(node: ComponentNode, connections: ComponentConnection[] = []): void {
     switch (node.type) {
       case 'GET_REQUEST':
         this.generateGetRequest(node);

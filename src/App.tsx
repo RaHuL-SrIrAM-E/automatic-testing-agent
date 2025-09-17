@@ -12,6 +12,7 @@ import { KarateGenerator } from './lib/karateGenerator';
 
 const initialFlowState: FlowState = {
   nodes: [],
+  connections: [],
   selectedNodeId: null,
   generatedCode: ''
 };
@@ -27,7 +28,7 @@ function App() {
       
       // Regenerate code whenever nodes change
       if (updates.nodes) {
-        newState.generatedCode = karateGenerator.generateFeature(newState.nodes);
+        newState.generatedCode = karateGenerator.generateFeature(newState.nodes, newState.connections);
       }
       
       return newState;
@@ -61,12 +62,13 @@ function App() {
     });
   }, [updateFlowState]);
 
-  const loadFlow = useCallback((nodes: ComponentNode[]) => {
-    updateFlowState({
-      nodes,
+  const loadFlow = useCallback((loadedFlowState: FlowState) => {
+    setFlowState({
+      ...loadedFlowState,
+      generatedCode: karateGenerator.generateFeature(loadedFlowState.nodes, loadedFlowState.connections),
       selectedNodeId: null
     });
-  }, [updateFlowState]);
+  }, [karateGenerator]);
 
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
@@ -128,6 +130,7 @@ function App() {
             <div className="flex-1 bg-gradient-to-br from-wf-gray-50 to-wf-gray-100 p-6">
               <Canvas
                 nodes={flowState.nodes}
+                connections={flowState.connections}
                 onNodeUpdate={updateNode}
                 onNodeDelete={deleteNode}
                 onNodeSelect={selectNode}

@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "name": "Basic API Test Flow",
+  "description": "Simple GET request with authentication and validation",
+  "nodes": [
+    {
+      "id": "demo-bearer-auth",
+      "type": "BEARER_AUTH",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "headerName": "Authorization"
+      },
+      "connections": [],
+      "outputs": [],
+      "inputs": []
+    },
+    {
+      "id": "demo-get-request",
+      "type": "GET_REQUEST",
+      "position": { "x": 100, "y": 200 },
+      "data": {
+        "url": "https://jsonplaceholder.typicode.com/users",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "queryParams": {
+          "limit": "10"
+        },
+        "timeout": 30000
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "response",
+          "description": "Full HTTP response",
+          "type": "object",
+          "source": "response",
+          "example": { "status": 200, "data": {} }
+        },
+        {
+          "name": "status",
+          "description": "HTTP status code",
+          "type": "number",
+          "source": "response.status",
+          "example": 200
+        },
+        {
+          "name": "body",
+          "description": "Response body",
+          "type": "object",
+          "source": "response.body",
+          "example": {}
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "id": "demo-status-check",
+      "type": "STATUS_ASSERTION",
+      "position": { "x": 50, "y": 350 },
+      "data": {
+        "expectedStatus": 200,
+        "operator": "equals"
+      },
+      "connections": [],
+      "outputs": [],
+      "inputs": []
+    },
+    {
+      "id": "demo-field-matcher",
+      "type": "FIELD_MATCHER",
+      "position": { "x": 150, "y": 350 },
+      "data": {
+        "jsonPath": "$[0].name",
+        "expectedValue": "Leanne Graham",
+        "operator": "equals"
+      },
+      "connections": [],
+      "outputs": [],
+      "inputs": []
+    }
+  ],
+  "connections": [],
+  "exportedAt": "2024-01-01T00:00:00.000Z"
+}

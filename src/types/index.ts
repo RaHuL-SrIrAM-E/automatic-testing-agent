@@ -4,6 +4,33 @@ export interface ComponentNode {
   position: { x: number; y: number };
   data: ComponentData;
   connections: string[];
+  outputs: ComponentOutput[]; // Output variables this component produces
+  inputs: ComponentInput[]; // Input variables this component expects
+}
+
+export interface ComponentOutput {
+  name: string;
+  description: string;
+  type: 'string' | 'number' | 'object' | 'array';
+  source: string; // JSONPath or field name
+  example?: any;
+}
+
+export interface ComponentInput {
+  name: string;
+  description: string;
+  type: 'string' | 'number' | 'object' | 'array';
+  required: boolean;
+  defaultValue?: any;
+}
+
+export interface ComponentConnection {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+  fromOutput: string; // Output variable name
+  toInput: string; // Input variable name
+  label?: string;
 }
 
 export interface ComponentData {
@@ -37,6 +64,8 @@ export interface ComponentDefinition {
   icon: string;
   defaultData: ComponentData;
   properties: PropertyDefinition[];
+  outputs?: ComponentOutput[];
+  inputs?: ComponentInput[];
 }
 
 export type ComponentCategory = 
@@ -58,6 +87,7 @@ export interface PropertyDefinition {
 
 export interface FlowState {
   nodes: ComponentNode[];
+  connections: ComponentConnection[];
   selectedNodeId: string | null;
   generatedCode: string;
 }

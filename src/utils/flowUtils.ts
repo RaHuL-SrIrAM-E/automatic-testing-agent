@@ -1,4 +1,4 @@
-import { ComponentNode } from '../types';
+import { ComponentNode, ComponentConnection, FlowState } from '../types';
 
 export const generateNodeId = (): string => {
   return `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -33,6 +33,26 @@ export const importFlowFromJson = (jsonString: string): ComponentNode[] => {
   } catch (error) {
     console.error('Failed to import flow:', error);
     return [];
+  }
+};
+
+export const importFlowStateFromJson = (jsonString: string): FlowState => {
+  try {
+    const data = JSON.parse(jsonString);
+    return {
+      nodes: data.nodes || [],
+      connections: data.connections || [],
+      selectedNodeId: null,
+      generatedCode: ''
+    };
+  } catch (error) {
+    console.error('Failed to import flow state:', error);
+    return {
+      nodes: [],
+      connections: [],
+      selectedNodeId: null,
+      generatedCode: ''
+    };
   }
 };
 

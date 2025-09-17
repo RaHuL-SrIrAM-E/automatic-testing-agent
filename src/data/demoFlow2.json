@@ -1,0 +1,254 @@
+{
+  "version": "1.0.0",
+  "name": "Sequential Appointment Workflow",
+  "description": "Get timeslots → Book appointment → Cancel appointment",
+  "nodes": [
+    {
+      "id": "get-timeslots",
+      "type": "GET_REQUEST",
+      "position": { "x": 200, "y": 100 },
+      "data": {
+        "url": "https://api.example.com/timeslots",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "queryParams": {
+          "date": "2024-01-15",
+          "service": "consultation"
+        },
+        "timeout": 30000
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "response",
+          "description": "Full HTTP response",
+          "type": "object",
+          "source": "response",
+          "example": { "status": 200, "data": {} }
+        },
+        {
+          "name": "timeslots",
+          "description": "Available timeslots",
+          "type": "array",
+          "source": "response.body.timeslots",
+          "example": ["09:00", "10:00", "11:00"]
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "id": "extract-timeslot",
+      "type": "VARIABLE_EXTRACTOR",
+      "position": { "x": 200, "y": 250 },
+      "data": {
+        "variableName": "selectedTimeslot",
+        "jsonPath": "$.timeslots[0]",
+        "defaultValue": "09:00"
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "selectedTimeslot",
+          "description": "Selected timeslot for booking",
+          "type": "string",
+          "source": "selectedTimeslot",
+          "example": "10:00"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "response",
+          "description": "Response data to extract from",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "book-appointment",
+      "type": "POST_REQUEST",
+      "position": { "x": 200, "y": 400 },
+      "data": {
+        "url": "https://api.example.com/appointments",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyType": "json",
+        "body": "{\n  \"patientName\": \"John Doe\",\n  \"appointmentDate\": \"2024-01-15\",\n  \"appointmentTime\": \"#(selectedTimeslot)\",\n  \"service\": \"consultation\"\n}"
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "response",
+          "description": "Full HTTP response",
+          "type": "object",
+          "source": "response",
+          "example": { "status": 201, "data": {} }
+        },
+        {
+          "name": "appointmentId",
+          "description": "Created appointment ID",
+          "type": "string",
+          "source": "response.body.id",
+          "example": "APT-12345"
+        },
+        {
+          "name": "confirmationNumber",
+          "description": "Appointment confirmation number",
+          "type": "string",
+          "source": "response.body.confirmationNumber",
+          "example": "CONF-789"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "selectedTimeslot",
+          "description": "Selected timeslot from previous step",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "extract-appointment-id",
+      "type": "VARIABLE_EXTRACTOR",
+      "position": { "x": 200, "y": 550 },
+      "data": {
+        "variableName": "appointmentId",
+        "jsonPath": "$.id",
+        "defaultValue": "N/A"
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "appointmentId",
+          "description": "Extracted appointment ID",
+          "type": "string",
+          "source": "appointmentId",
+          "example": "APT-12345"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "response",
+          "description": "Response data to extract from",
+          "type": "object",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "cancel-appointment",
+      "type": "DELETE_REQUEST",
+      "position": { "x": 200, "y": 700 },
+      "data": {
+        "url": "https://api.example.com/appointments/#(appointmentId)",
+        "headers": {
+          "Accept": "application/json"
+        },
+        "timeout": 30000
+      },
+      "connections": [],
+      "outputs": [
+        {
+          "name": "response",
+          "description": "Full HTTP response",
+          "type": "object",
+          "source": "response",
+          "example": { "status": 200, "data": {} }
+        },
+        {
+          "name": "status",
+          "description": "HTTP status code",
+          "type": "number",
+          "source": "response.status",
+          "example": 200
+        }
+      ],
+      "inputs": [
+        {
+          "name": "appointmentId",
+          "description": "Appointment ID to cancel",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "validate-cancellation",
+      "type": "STATUS_ASSERTION",
+      "position": { "x": 100, "y": 850 },
+      "data": {
+        "expectedStatus": 200,
+        "operator": "equals"
+      },
+      "connections": [],
+      "outputs": [],
+      "inputs": []
+    },
+    {
+      "id": "validate-response-time",
+      "type": "RESPONSE_TIME_CHECK",
+      "position": { "x": 300, "y": 850 },
+      "data": {
+        "maxResponseTime": 2000,
+        "operator": "lessThan"
+      },
+      "connections": [],
+      "outputs": [],
+      "inputs": []
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1",
+      "fromNodeId": "get-timeslots",
+      "toNodeId": "extract-timeslot",
+      "fromOutput": "response",
+      "toInput": "response",
+      "label": "Extract Timeslot"
+    },
+    {
+      "id": "conn-2",
+      "fromNodeId": "extract-timeslot",
+      "toNodeId": "book-appointment",
+      "fromOutput": "selectedTimeslot",
+      "toInput": "selectedTimeslot",
+      "label": "Use Timeslot"
+    },
+    {
+      "id": "conn-3",
+      "fromNodeId": "book-appointment",
+      "toNodeId": "extract-appointment-id",
+      "fromOutput": "response",
+      "toInput": "response",
+      "label": "Extract ID"
+    },
+    {
+      "id": "conn-4",
+      "fromNodeId": "extract-appointment-id",
+      "toNodeId": "cancel-appointment",
+      "fromOutput": "appointmentId",
+      "toInput": "appointmentId",
+      "label": "Cancel Appointment"
+    },
+    {
+      "id": "conn-5",
+      "fromNodeId": "cancel-appointment",
+      "toNodeId": "validate-cancellation",
+      "fromOutput": "status",
+      "toInput": "status",
+      "label": "Validate Status"
+    },
+    {
+      "id": "conn-6",
+      "fromNodeId": "cancel-appointment",
+      "toNodeId": "validate-response-time",
+      "fromOutput": "response",
+      "toInput": "response",
+      "label": "Check Response Time"
+    }
+  ],
+  "exportedAt": "2024-01-01T00:00:00.000Z"
+}

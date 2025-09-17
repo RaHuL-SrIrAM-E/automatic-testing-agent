@@ -47,6 +47,49 @@ export const componentDefinitions: ComponentDefinition[] = [
         placeholder: '30000',
         description: 'Request timeout in milliseconds'
       }
+    ],
+    outputs: [
+      {
+        name: 'response',
+        description: 'Full HTTP response',
+        type: 'object',
+        source: 'response',
+        example: { status: 200, data: {} }
+      },
+      {
+        name: 'status',
+        description: 'HTTP status code',
+        type: 'number',
+        source: 'response.status',
+        example: 200
+      },
+      {
+        name: 'body',
+        description: 'Response body',
+        type: 'object',
+        source: 'response.body',
+        example: {}
+      }
+    ],
+    inputs: [
+      {
+        name: 'url',
+        description: 'Request URL (can use variables)',
+        type: 'string',
+        required: true
+      },
+      {
+        name: 'headers',
+        description: 'Request headers (can use variables)',
+        type: 'object',
+        required: false
+      },
+      {
+        name: 'queryParams',
+        description: 'Query parameters (can use variables)',
+        type: 'object',
+        required: false
+      }
     ]
   },
   {
@@ -93,6 +136,56 @@ export const componentDefinitions: ComponentDefinition[] = [
         required: false,
         placeholder: '{"name": "John Doe", "email": "john@example.com"}',
         description: 'The request body content'
+      }
+    ],
+    outputs: [
+      {
+        name: 'response',
+        description: 'Full HTTP response',
+        type: 'object',
+        source: 'response',
+        example: { status: 201, data: {} }
+      },
+      {
+        name: 'status',
+        description: 'HTTP status code',
+        type: 'number',
+        source: 'response.status',
+        example: 201
+      },
+      {
+        name: 'body',
+        description: 'Response body',
+        type: 'object',
+        source: 'response.body',
+        example: { id: 123, name: 'John' }
+      },
+      {
+        name: 'id',
+        description: 'Created resource ID (common pattern)',
+        type: 'string',
+        source: 'response.body.id',
+        example: '123'
+      }
+    ],
+    inputs: [
+      {
+        name: 'url',
+        description: 'Request URL (can use variables)',
+        type: 'string',
+        required: true
+      },
+      {
+        name: 'headers',
+        description: 'Request headers (can use variables)',
+        type: 'object',
+        required: false
+      },
+      {
+        name: 'body',
+        description: 'Request body (can use variables)',
+        type: 'string',
+        required: false
       }
     ]
   },
@@ -405,6 +498,23 @@ export const componentDefinitions: ComponentDefinition[] = [
         required: false,
         placeholder: 'default-value',
         description: 'Default value if extraction fails'
+      }
+    ],
+    outputs: [
+      {
+        name: 'extractedValue',
+        description: 'The extracted variable value',
+        type: 'string',
+        source: 'variableName',
+        example: '123'
+      }
+    ],
+    inputs: [
+      {
+        name: 'response',
+        description: 'Response data to extract from',
+        type: 'object',
+        required: true
       }
     ]
   },
