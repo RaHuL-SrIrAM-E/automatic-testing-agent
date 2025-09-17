@@ -6,6 +6,7 @@ import { Canvas } from './components/Canvas';
 import { PropertiesPanel } from './components/PropertiesPanel';
 import { CodePreview } from './components/CodePreview';
 import { ExampleFlow } from './components/ExampleFlow';
+import { ProjectGenerator } from './components/ProjectGenerator';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 
@@ -17,6 +18,7 @@ const initialFlowState: FlowState = {
 
 function App() {
   const [flowState, setFlowState] = useState<FlowState>(initialFlowState);
+  const [activeTab, setActiveTab] = useState<'feature' | 'project'>('feature');
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
 
   const updateFlowState = useCallback((updates: Partial<FlowState>) => {
@@ -86,8 +88,17 @@ function App() {
               <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
                 Save Flow
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <button 
+                onClick={() => setActiveTab('feature')}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
                 Export Feature
+              </button>
+              <button 
+                onClick={() => setActiveTab('project')}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Generate Project
               </button>
             </div>
           </div>
@@ -122,9 +133,42 @@ function App() {
               />
             </div>
             
-            {/* Code Preview */}
+            {/* Code Preview / Project Generator */}
             <div className="h-80 bg-white border-t border-gray-200">
-              <CodePreview code={flowState.generatedCode} />
+              <div className="h-full flex flex-col">
+                {/* Tab Navigation */}
+                <div className="flex border-b border-gray-200">
+                  <button
+                    onClick={() => setActiveTab('feature')}
+                    className={`px-4 py-2 text-sm font-medium ${
+                      activeTab === 'feature'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Feature File
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('project')}
+                    className={`px-4 py-2 text-sm font-medium ${
+                      activeTab === 'project'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Complete Project
+                  </button>
+                </div>
+                
+                {/* Tab Content */}
+                <div className="flex-1 overflow-hidden">
+                  {activeTab === 'feature' ? (
+                    <CodePreview code={flowState.generatedCode} />
+                  ) : (
+                    <ProjectGenerator nodes={flowState.nodes} />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
