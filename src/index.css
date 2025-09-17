@@ -4,41 +4,93 @@
 
 @layer base {
   * {
-    @apply border-gray-200;
+    @apply border-wf-gray-200;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-wf-gray-50 text-wf-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
 @layer components {
   .component-card {
-    @apply bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer;
+    @apply bg-white border border-wf-gray-200 rounded-xl p-4 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer;
+    @apply hover:border-wf-red-500 hover:scale-105 hover:bg-gradient-to-br hover:from-wf-red-50 hover:to-wf-yellow-50;
   }
   
   .component-card:hover {
-    @apply border-primary-500;
+    @apply border-wf-red-500 shadow-wf-red-100;
+  }
+  
+  .component-card .icon {
+    @apply transition-all duration-300 group-hover:scale-110;
   }
   
   .canvas-node {
-    @apply bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[200px] cursor-move;
+    @apply bg-white border-2 border-wf-gray-300 rounded-xl p-4 shadow-lg min-w-[200px] cursor-move transition-all duration-300;
+    @apply hover:border-wf-red-400 hover:shadow-xl hover:scale-105;
   }
   
   .canvas-node.selected {
-    @apply border-primary-500 shadow-lg;
+    @apply border-wf-red-500 shadow-xl ring-4 ring-wf-red-100 scale-105;
   }
   
   .canvas-node:hover {
-    @apply border-gray-400;
+    @apply border-wf-red-400 shadow-xl;
   }
   
   .property-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-3 border border-wf-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-wf-red-500 focus:border-wf-red-500 transition-all duration-200;
+    @apply hover:border-wf-red-300;
   }
   
   .property-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-semibold text-wf-gray-700 mb-2;
+  }
+  
+  .btn-primary {
+    @apply bg-wf-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply hover:bg-wf-red-700 hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-wf-yellow-500 text-wf-gray-900 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply hover:bg-wf-yellow-600 hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-wf-red-600 text-wf-red-600 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply hover:bg-wf-red-600 hover:text-white hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+  
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-sm border border-wf-gray-200 rounded-xl shadow-lg;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-wf-red-50 via-white to-wf-yellow-50;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-wf-red-600 to-wf-yellow-600 bg-clip-text text-transparent;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-wf-gray-100 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-wf-red-500 to-wf-yellow-500 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply from-wf-red-600 to-wf-yellow-600;
   }
 }

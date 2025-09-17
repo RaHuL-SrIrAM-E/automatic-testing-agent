@@ -74,36 +74,46 @@ export const Canvas: React.FC<CanvasProps> = ({
         }
         drop(ref);
       }}
-      className={`relative w-full h-full bg-white rounded-lg border-2 border-dashed ${
-        isOver ? 'border-primary-400 bg-primary-50' : 'border-gray-300'
-      } transition-colors`}
+      className={`relative w-full h-full glass-panel rounded-2xl border-2 border-dashed ${
+        isOver 
+          ? 'border-wf-red-400 bg-gradient-to-br from-wf-red-50 to-wf-yellow-50 shadow-wf-lg' 
+          : 'border-wf-gray-300 hover:border-wf-red-300'
+      } transition-all duration-300`}
       onClick={handleCanvasClick}
     >
       {nodes.length === 0 ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🎯</span>
+          <div className="text-center animate-fade-in">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-2xl flex items-center justify-center shadow-wf-lg">
+              <span className="text-3xl">🎯</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-2xl font-bold text-wf-gray-900 mb-3">
               Start Building Your Test Flow
             </h3>
-            <p className="text-gray-500">
+            <p className="text-wf-gray-600 text-lg mb-6">
               Drag components from the left panel to create your Karate test
             </p>
+            <div className="flex items-center justify-center space-x-2 text-wf-gray-500">
+              <div className="w-2 h-2 bg-wf-red-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-wf-yellow-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-wf-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
           </div>
         </div>
       ) : (
-        nodes.map((node) => (
-          <CanvasNode
-            key={node.id}
-            node={node}
-            isSelected={selectedNodeId === node.id}
-            onMove={handleNodeMove}
-            onClick={handleNodeClick}
-            onDelete={onNodeDelete}
-          />
-        ))
+        <div className="relative w-full h-full">
+          {nodes.map((node, index) => (
+            <div key={node.id} className="animate-scale-in" style={{ animationDelay: `${index * 0.1}s` }}>
+              <CanvasNode
+                node={node}
+                isSelected={selectedNodeId === node.id}
+                onMove={handleNodeMove}
+                onClick={handleNodeClick}
+                onDelete={onNodeDelete}
+              />
+            </div>
+          ))}
+        </div>
       )}
       
       {/* Connection lines would go here in a more advanced implementation */}

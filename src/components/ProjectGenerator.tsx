@@ -78,44 +78,46 @@ export const ProjectGenerator: React.FC<ProjectGeneratorProps> = ({ nodes }) => 
   };
 
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg">
-      <div className="mb-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <FolderOpen className="w-6 h-6 text-blue-600" />
+    <div className="p-6 glass-panel rounded-2xl">
+      <div className="mb-8">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-xl flex items-center justify-center shadow-wf">
+            <FolderOpen className="w-6 h-6 text-white" />
+          </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Generate Complete Karate Project</h3>
-            <p className="text-sm text-gray-600">Creates a ready-to-run Maven project with all files</p>
+            <h3 className="text-2xl font-bold text-gradient">Generate Complete Karate Project</h3>
+            <p className="text-wf-gray-600">Creates a ready-to-run Maven project with all files</p>
           </div>
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="mb-6">
+          <label className="property-label">
             Project Name
           </label>
           <input
             type="text"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="property-input"
             placeholder="Enter project name"
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button
             onClick={handleGenerateProject}
             disabled={isGenerating || nodes.length === 0}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className="w-full btn-primary flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Generating...</span>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="font-semibold">Generating...</span>
               </>
             ) : (
               <>
-                <Settings className="w-4 h-4" />
-                <span>Generate Project</span>
+                <Settings className="w-5 h-5" />
+                <span className="font-semibold">Generate Project</span>
               </>
             )}
           </button>
@@ -135,9 +137,9 @@ export const ProjectGenerator: React.FC<ProjectGeneratorProps> = ({ nodes }) => 
               URL.revokeObjectURL(url);
               console.log('Test download completed');
             }}
-            className="w-full px-3 py-1 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600"
+            className="w-full btn-outline text-sm"
           >
-            Test Download
+            🧪 Test Download
           </button>
           
           {/* Simple Project Download */}
@@ -177,60 +179,75 @@ Scenario: User Test Flow
               URL.revokeObjectURL(url);
               console.log('Simple project download completed');
             }}
-            className="w-full px-3 py-1 bg-purple-500 text-white text-sm rounded-md hover:bg-purple-600"
+            className="w-full btn-secondary text-sm"
           >
-            Download Simple Project
+            📦 Download Simple Project
           </button>
         </div>
 
         {/* Instructions */}
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">How to Run Generated Project:</h4>
-          <div className="text-xs text-blue-800 space-y-1">
+        <div className="mt-6 p-4 bg-gradient-to-r from-wf-red-50 to-wf-yellow-50 border border-wf-red-200 rounded-xl">
+          <h4 className="text-sm font-bold text-wf-gray-900 mb-3 flex items-center space-x-2">
+            <span>📋</span>
+            <span>How to Run Generated Project:</span>
+          </h4>
+          <div className="text-sm text-wf-gray-700 space-y-2">
             <p>1. <strong>Download the ZIP file</strong> (auto-downloads after generation)</p>
             <p>2. <strong>Extract the ZIP</strong> to a folder</p>
             <p>3. <strong>Open terminal</strong> in the project folder</p>
-            <p>4. <strong>Run:</strong> <code className="bg-blue-100 px-1 rounded">chmod +x setup.sh && ./setup.sh</code></p>
-            <p className="text-blue-600 font-medium">That's it! The script will install dependencies and run tests automatically.</p>
+            <p>4. <strong>Run:</strong> <code className="bg-wf-gray-100 px-2 py-1 rounded-lg font-mono text-xs">chmod +x setup.sh && ./setup.sh</code></p>
+            <p className="text-wf-red-600 font-bold">That's it! The script will install dependencies and run tests automatically.</p>
           </div>
         </div>
       </div>
 
       {generatedProject && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-md font-medium text-gray-900">Generated Project Files</h4>
+        <div className="space-y-6 mt-8 animate-fade-in max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-10 pb-4">
+            <h4 className="text-xl font-bold text-gradient flex items-center space-x-2">
+              <span>📁</span>
+              <span>Generated Project Files</span>
+            </h4>
             <button
               onClick={handleDownloadProject}
-              className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center space-x-1"
+              className="btn-secondary flex items-center space-x-2"
             >
-              <Download className="w-3 h-3" />
+              <Download className="w-4 h-4" />
               <span>Download ZIP</span>
             </button>
           </div>
           
           {/* Debug Info */}
-          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-            <strong>Debug:</strong> Project generated with {generatedProject.features.length} features, {generatedProject.configFiles.length} configs
+          <div className="p-4 bg-gradient-to-r from-wf-yellow-50 to-wf-red-50 border border-wf-yellow-200 rounded-xl">
+            <div className="flex items-center space-x-2 text-sm font-semibold text-wf-gray-900">
+              <span>🔍</span>
+              <span>Debug Info:</span>
+            </div>
+            <p className="text-sm text-wf-gray-700 mt-1">
+              Project generated with <strong>{generatedProject.features.length}</strong> features, <strong>{generatedProject.configFiles.length}</strong> configs
+            </p>
           </div>
 
           {/* Feature Files */}
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-              <FileText className="w-4 h-4" />
+          <div className="glass-panel p-4 rounded-xl">
+            <h5 className="text-lg font-bold text-wf-gray-900 mb-4 flex items-center space-x-2">
+              <FileText className="w-5 h-5 text-wf-red-600" />
               <span>Feature Files ({generatedProject.features.length})</span>
             </h5>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {generatedProject.features.map((feature, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-wf-gray-50 to-wf-gray-100 rounded-xl border border-wf-gray-200 hover:shadow-wf transition-all duration-300">
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{feature.name}</div>
-                    <div className="text-xs text-gray-500">{feature.path}</div>
-                    <div className="text-xs text-gray-400">{feature.description}</div>
+                    <div className="text-sm font-bold text-wf-gray-900 flex items-center space-x-2">
+                      <span>📄</span>
+                      <span>{feature.name}</span>
+                    </div>
+                    <div className="text-xs text-wf-gray-600 font-mono mt-1">{feature.path}</div>
+                    <div className="text-xs text-wf-gray-500 mt-1">{feature.description}</div>
                   </div>
                   <button
                     onClick={() => handleDownloadFeature(feature)}
-                    className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                    className="ml-3 px-3 py-1 text-xs btn-outline hover:scale-105 transition-transform duration-200"
                   >
                     Download
                   </button>
@@ -240,21 +257,24 @@ Scenario: User Test Flow
           </div>
 
           {/* Configuration Files */}
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-              <Settings className="w-4 h-4" />
+          <div className="glass-panel p-4 rounded-xl">
+            <h5 className="text-lg font-bold text-wf-gray-900 mb-4 flex items-center space-x-2">
+              <Settings className="w-5 h-5 text-wf-yellow-600" />
               <span>Configuration Files ({generatedProject.configFiles.length})</span>
             </h5>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {generatedProject.configFiles.map((config, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-wf-gray-50 to-wf-gray-100 rounded-xl border border-wf-gray-200 hover:shadow-wf transition-all duration-300">
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{config.name}</div>
-                    <div className="text-xs text-gray-500">{config.path}</div>
+                    <div className="text-sm font-bold text-wf-gray-900 flex items-center space-x-2">
+                      <span>⚙️</span>
+                      <span>{config.name}</span>
+                    </div>
+                    <div className="text-xs text-wf-gray-600 font-mono mt-1">{config.path}</div>
                   </div>
                   <button
                     onClick={() => handleDownloadConfig(config)}
-                    className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                    className="ml-3 px-3 py-1 text-xs btn-secondary hover:scale-105 transition-transform duration-200"
                   >
                     Download
                   </button>
@@ -264,22 +284,25 @@ Scenario: User Test Flow
           </div>
 
           {/* Data Files */}
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
-              <Database className="w-4 h-4" />
+          <div className="glass-panel p-4 rounded-xl">
+            <h5 className="text-lg font-bold text-wf-gray-900 mb-4 flex items-center space-x-2">
+              <Database className="w-5 h-5 text-wf-red-600" />
               <span>Data Files ({generatedProject.dataFiles.length})</span>
             </h5>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {generatedProject.dataFiles.map((dataFile, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-wf-gray-50 to-wf-gray-100 rounded-xl border border-wf-gray-200 hover:shadow-wf transition-all duration-300">
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{dataFile.name}</div>
-                    <div className="text-xs text-gray-500">{dataFile.path}</div>
-                    <div className="text-xs text-gray-400">Type: {dataFile.type.toUpperCase()}</div>
+                    <div className="text-sm font-bold text-wf-gray-900 flex items-center space-x-2">
+                      <span>📊</span>
+                      <span>{dataFile.name}</span>
+                    </div>
+                    <div className="text-xs text-wf-gray-600 font-mono mt-1">{dataFile.path}</div>
+                    <div className="text-xs text-wf-gray-500 mt-1">Type: {dataFile.type.toUpperCase()}</div>
                   </div>
                   <button
                     onClick={() => handleDownloadConfig(dataFile)}
-                    className="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                    className="ml-3 px-3 py-1 text-xs btn-outline hover:scale-105 transition-transform duration-200"
                   >
                     Download
                   </button>
@@ -289,9 +312,12 @@ Scenario: User Test Flow
           </div>
 
           {/* Project Structure */}
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 mb-2">Project Structure</h5>
-            <div className="p-3 bg-gray-900 text-gray-100 rounded font-mono text-xs overflow-x-auto">
+          <div className="glass-panel p-4 rounded-xl">
+            <h5 className="text-lg font-bold text-wf-gray-900 mb-4 flex items-center space-x-2">
+              <span>🏗️</span>
+              <span>Project Structure</span>
+            </h5>
+            <div className="p-4 bg-gradient-to-br from-wf-gray-900 to-wf-gray-800 text-wf-gray-100 rounded-xl font-mono text-sm overflow-x-auto shadow-wf-lg">
               <pre>{JSON.stringify(generatedProject.folderStructure, null, 2)}</pre>
             </div>
           </div>

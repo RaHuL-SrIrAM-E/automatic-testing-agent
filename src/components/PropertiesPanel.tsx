@@ -132,15 +132,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (!selectedNode) {
     return (
-      <div className="p-4">
-        <div className="text-center text-gray-500">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <span className="text-2xl">⚙️</span>
+      <div className="p-8">
+        <div className="text-center text-wf-gray-500 animate-fade-in">
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-wf-red-100 to-wf-yellow-100 rounded-2xl flex items-center justify-center shadow-wf">
+            <span className="text-3xl">⚙️</span>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-xl font-bold text-wf-gray-900 mb-3">
             No Component Selected
           </h3>
-          <p className="text-sm">
+          <p className="text-wf-gray-600">
             Click on a component in the canvas to configure its properties
           </p>
         </div>
@@ -151,25 +151,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const definition = getComponentDefinition(selectedNode.type);
   if (!definition) {
     return (
-      <div className="p-4">
-        <div className="text-center text-red-500">
-          <h3 className="text-lg font-medium mb-2">Unknown Component</h3>
-          <p className="text-sm">This component type is not recognized</p>
+      <div className="p-8">
+        <div className="text-center text-wf-gray-500 animate-fade-in">
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-wf-red-100 to-wf-yellow-100 rounded-2xl flex items-center justify-center shadow-wf">
+            <span className="text-3xl">❌</span>
+          </div>
+          <h3 className="text-xl font-bold text-wf-gray-900 mb-3">Unknown Component</h3>
+          <p className="text-wf-gray-600">This component type is not recognized</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
+    <div className="p-6 animate-fade-in">
       <div className="mb-6">
-        <div className="flex items-center space-x-3 mb-2">
-          <span className="text-2xl">{definition.icon}</span>
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-xl flex items-center justify-center shadow-wf">
+            <span className="text-2xl text-white">{definition.icon}</span>
+          </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900">
+            <h3 className="text-xl font-bold text-wf-gray-900">
               {definition.name}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-wf-gray-600">
               {definition.description}
             </p>
           </div>

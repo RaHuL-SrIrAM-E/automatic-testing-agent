@@ -14,19 +14,22 @@ export const ExampleFlow: React.FC<ExampleFlowProps> = ({ onLoadFlow }) => {
   };
 
   return (
-    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-      <div className="flex items-center space-x-3 mb-3">
-        <span className="text-2xl">🚀</span>
+    <div className="p-6 bg-gradient-to-r from-wf-red-50 to-wf-yellow-50 border border-wf-red-200 rounded-xl shadow-wf animate-fade-in">
+      <div className="flex items-center space-x-4 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-xl flex items-center justify-center shadow-wf">
+          <span className="text-2xl">🚀</span>
+        </div>
         <div>
-          <h3 className="text-lg font-medium text-blue-900">Quick Start</h3>
-          <p className="text-sm text-blue-700">Try the demo flow to see how it works</p>
+          <h3 className="text-xl font-bold text-wf-gray-900">Quick Start</h3>
+          <p className="text-wf-gray-700">Try the demo flow to see how it works</p>
         </div>
       </div>
       <button
         onClick={handleLoadDemo}
-        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full btn-primary flex items-center justify-center space-x-3"
       >
-        Load Demo Flow
+        <span className="text-lg">🎯</span>
+        <span className="font-semibold">Load Demo Flow</span>
       </button>
     </div>
   );

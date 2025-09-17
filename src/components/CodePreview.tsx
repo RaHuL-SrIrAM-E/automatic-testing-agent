@@ -41,43 +41,48 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ code }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-3">
-          <h3 className="text-lg font-medium text-gray-900">Generated Karate Code</h3>
-          <span className="px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
-            Live Preview
-          </span>
+      <div className="flex items-center justify-between p-6 border-b border-wf-gray-200 bg-gradient-to-r from-wf-red-50 to-wf-yellow-50">
+        <div className="flex items-center space-x-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-wf-red-500 to-wf-yellow-500 rounded-xl flex items-center justify-center shadow-wf">
+            <span className="text-white text-lg">📄</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-wf-gray-900">Generated Karate Code</h3>
+            <span className="px-3 py-1 text-xs font-bold bg-wf-red-100 text-wf-red-800 rounded-full">
+              Live Preview
+            </span>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-3 text-wf-gray-600 hover:text-wf-red-600 hover:bg-wf-red-50 rounded-lg transition-all duration-300 hover:scale-110"
             title={isExpanded ? 'Collapse' : 'Expand'}
           >
-            {isExpanded ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {isExpanded ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
           <button
             onClick={handleCopy}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-3 text-wf-gray-600 hover:text-wf-yellow-600 hover:bg-wf-yellow-50 rounded-lg transition-all duration-300 hover:scale-110"
             title="Copy to clipboard"
           >
-            <Copy className="w-4 h-4" />
+            <Copy className="w-5 h-5" />
           </button>
           <button
             onClick={handleDownload}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-3 text-wf-gray-600 hover:text-wf-red-600 hover:bg-wf-red-50 rounded-lg transition-all duration-300 hover:scale-110"
             title="Download .feature file"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       {/* Code Content */}
       <div className={`flex-1 ${isExpanded ? 'h-96' : 'h-48'} overflow-hidden`}>
-        <div className="h-full bg-gray-900 text-gray-100 font-mono text-sm overflow-auto">
-          <div className="p-4">
-            <pre className="whitespace-pre-wrap">
+        <div className="h-full bg-gradient-to-br from-wf-gray-900 to-wf-gray-800 text-wf-gray-100 font-mono text-sm overflow-auto shadow-wf-lg">
+          <div className="p-6">
+            <pre className="whitespace-pre-wrap leading-relaxed">
               {formatCode(code)}
             </pre>
           </div>
@@ -85,16 +90,16 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ code }) => {
       </div>
 
       {/* Status Bar */}
-      <div className="px-4 py-2 bg-gray-100 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-        <div className="flex items-center space-x-4">
-          <span>Lines: {code.split('\n').length}</span>
-          <span>Characters: {code.length}</span>
+      <div className="px-6 py-3 bg-gradient-to-r from-wf-gray-100 to-wf-gray-200 border-t border-wf-gray-300 flex items-center justify-between text-sm text-wf-gray-600">
+        <div className="flex items-center space-x-6">
+          <span className="font-semibold">Lines: {code.split('\n').length}</span>
+          <span className="font-semibold">Characters: {code.length}</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           {copied && (
-            <span className="text-green-600 font-medium">Copied!</span>
+            <span className="text-wf-red-600 font-bold animate-fade-in">✅ Copied!</span>
           )}
-          <span>Karate DSL</span>
+          <span className="font-semibold">Karate DSL</span>
         </div>
       </div>
     </div>
