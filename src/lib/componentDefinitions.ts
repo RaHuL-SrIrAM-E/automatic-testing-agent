@@ -465,48 +465,58 @@ export const componentDefinitions: ComponentDefinition[] = [
   // Data Management Components
   {
     type: 'VARIABLE_EXTRACTOR',
-    name: 'Extract Variable',
-    description: 'Extract values from response',
+    name: 'Extract Variables',
+    description: 'Extract multiple values from response',
     category: 'DATA_MANAGEMENT',
     icon: '📤',
     defaultData: {
-      variableName: '',
-      jsonPath: '',
-      defaultValue: ''
+      extractions: [
+        {
+          variableName: '',
+          jsonPath: '',
+          defaultValue: ''
+        }
+      ]
     },
     properties: [
       {
-        key: 'variableName',
-        label: 'Variable Name',
-        type: 'text',
+        key: 'extractions',
+        label: 'Variable Extractions',
+        type: 'array',
         required: true,
-        placeholder: 'userId',
-        description: 'Name of the variable to store the extracted value'
-      },
-      {
-        key: 'jsonPath',
-        label: 'JSON Path',
-        type: 'text',
-        required: true,
-        placeholder: '$.data.id',
-        description: 'JSONPath expression to extract the value'
-      },
-      {
-        key: 'defaultValue',
-        label: 'Default Value',
-        type: 'text',
-        required: false,
-        placeholder: 'default-value',
-        description: 'Default value if extraction fails'
+        description: 'List of variables to extract from the response',
+        arrayItemSchema: {
+          variableName: {
+            type: 'text',
+            label: 'Variable Name',
+            required: true,
+            placeholder: 'userId',
+            description: 'Name of the variable to store the extracted value'
+          },
+          jsonPath: {
+            type: 'text',
+            label: 'JSON Path',
+            required: true,
+            placeholder: '$.data.id',
+            description: 'JSONPath expression to extract the value'
+          },
+          defaultValue: {
+            type: 'text',
+            label: 'Default Value',
+            required: false,
+            placeholder: 'default-value',
+            description: 'Default value if extraction fails'
+          }
+        }
       }
     ],
     outputs: [
       {
-        name: 'extractedValue',
-        description: 'The extracted variable value',
-        type: 'string',
-        source: 'variableName',
-        example: '123'
+        name: 'extractedVariables',
+        description: 'All extracted variables as an object',
+        type: 'object',
+        source: 'extractedVariables',
+        example: { userId: '123', userName: 'John', userEmail: 'john@example.com' }
       }
     ],
     inputs: [

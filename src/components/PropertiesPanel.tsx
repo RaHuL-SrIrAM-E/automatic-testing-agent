@@ -38,6 +38,29 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     }
   };
 
+  const handleArrayAdd = (key: string) => {
+    const currentArray = formData[key] || [];
+    const newItem = {
+      variableName: '',
+      jsonPath: '',
+      defaultValue: ''
+    };
+    handleInputChange(key, [...currentArray, newItem]);
+  };
+
+  const handleArrayRemove = (key: string, index: number) => {
+    const currentArray = formData[key] || [];
+    const newArray = currentArray.filter((_: any, i: number) => i !== index);
+    handleInputChange(key, newArray);
+  };
+
+  const handleArrayItemChange = (key: string, index: number, fieldKey: string, value: string) => {
+    const currentArray = formData[key] || [];
+    const newArray = [...currentArray];
+    newArray[index] = { ...newArray[index], [fieldKey]: value };
+    handleInputChange(key, newArray);
+  };
+
   const renderPropertyInput = (property: any) => {
     const value = formData[property.key] || '';
 
@@ -115,6 +138,59 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             onChange={(e) => handleJsonInputChange(property.key, e.target.value)}
             placeholder={property.placeholder}
           />
+        );
+
+      case 'array':
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="property-label">{property.label}</label>
+              <button
+                type="button"
+                onClick={() => handleArrayAdd(property.key)}
+                className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
+              >
+                + Add Item
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(value || []).map((item: any, index: number) => (
+                <div key={index} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Extraction {index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleArrayRemove(property.key, index)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {Object.entries(property.arrayItemSchema || {}).map(([fieldKey, fieldSchema]: [string, any]) => (
+                      <div key={fieldKey}>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {fieldSchema.label}
+                        </label>
+                        <input
+                          type="text"
+                          className="property-input text-sm"
+                          value={item[fieldKey] || ''}
+                          onChange={(e) => handleArrayItemChange(property.key, index, fieldKey, e.target.value)}
+                          placeholder={fieldSchema.placeholder}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {(!value || value.length === 0) && (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  No extractions configured. Click "Add Item" to get started.
+                </div>
+              )}
+            </div>
+          </div>
         );
 
       default:

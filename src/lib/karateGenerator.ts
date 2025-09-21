@@ -359,20 +359,81 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateVariableExtractor(node: ComponentNode): void {
-    const { variableName, jsonPath, defaultValue } = node.data;
+    const { extractions } = node.data;
     
-    if (!variableName || !jsonPath) {
-      this.generatedSteps.push('* print "Variable Extractor: Variable name or JSON path not configured"');
+    if (!extractions || !Array.isArray(extractions) || extractions.length === 0) {
+      this.generatedSteps.push('* print "Variable Extractor: No extractions configured"');
       return;
     }
 
-    if (defaultValue) {
-      this.generatedSteps.push(`* def ${variableName} = ${jsonPath} || '${defaultValue}'`);
-    } else {
-      this.generatedSteps.push(`* def ${variableName} = ${jsonPath}`);
+    // Validate extractions
+    const validExtractions = this.validateExtractions(extractions);
+    
+    if (validExtractions.length === 0) {
+      this.generatedSteps.push('* print "Variable Extractor: No valid extractions found"');
+      return;
     }
 
-    this.variables.set(variableName, jsonPath);
+    // Generate individual variable extractions
+    validExtractions.forEach((extraction: any, index: number) => {
+      const { variableName, jsonPath, defaultValue } = extraction;
+      
+      if (defaultValue) {
+        this.generatedSteps.push(`* def ${variableName} = ${jsonPath} || '${defaultValue}'`);
+      } else {
+        this.generatedSteps.push(`* def ${variableName} = ${jsonPath}`);
+      }
+
+      this.variables.set(variableName, jsonPath);
+    });
+
+    // Generate a combined object with all extracted variables
+    const variableNames = validExtractions.map((ext: any) => ext.variableName);
+    
+    if (variableNames.length > 0) {
+      const objectDefinition = variableNames
+        .map(name => `${name}: ${name}`)
+        .join(', ');
+      this.generatedSteps.push(`* def extractedVariables = { ${objectDefinition} }`);
+    }
+  }
+
+  private validateExtractions(extractions: any[]): any[] {
+    const validExtractions: any[] = [];
+    const seenVariableNames = new Set<string>();
+    
+    extractions.forEach((extraction: any, index: number) => {
+      const { variableName, jsonPath, defaultValue } = extraction;
+      
+      // Check if variable name and JSON path are provided
+      if (!variableName || !jsonPath) {
+        this.generatedSteps.push(`* print "Variable Extractor: Extraction ${index + 1} - Variable name or JSON path not configured"`);
+        return;
+      }
+      
+      // Check for duplicate variable names
+      if (seenVariableNames.has(variableName)) {
+        this.generatedSteps.push(`* print "Variable Extractor: Extraction ${index + 1} - Duplicate variable name '${variableName}'"`);
+        return;
+      }
+      
+      // Check if variable name is valid (alphanumeric + underscore)
+      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(variableName)) {
+        this.generatedSteps.push(`* print "Variable Extractor: Extraction ${index + 1} - Invalid variable name '${variableName}' (must start with letter/underscore, contain only alphanumeric/underscore)"`);
+        return;
+      }
+      
+      // Check if JSON path starts with $ or @
+      if (!jsonPath.startsWith('$') && !jsonPath.startsWith('@')) {
+        this.generatedSteps.push(`* print "Variable Extractor: Extraction ${index + 1} - Invalid JSON path '${jsonPath}' (must start with $ or @)"`);
+        return;
+      }
+      
+      seenVariableNames.add(variableName);
+      validExtractions.push(extraction);
+    });
+    
+    return validExtractions;
   }
 
   private generateVariableSetter(node: ComponentNode): void {

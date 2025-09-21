@@ -7,6 +7,7 @@ import { PropertiesPanel } from './components/PropertiesPanel';
 import { CodePreview } from './components/CodePreview';
 import { ExampleFlow } from './components/ExampleFlow';
 import { ProjectGenerator } from './components/ProjectGenerator';
+import { TestResults } from './components/TestResults';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download } from 'lucide-react';
@@ -22,6 +23,8 @@ function App() {
   const [flowState, setFlowState] = useState<FlowState>(initialFlowState);
   const [activeTab, setActiveTab] = useState<'feature' | 'project'>('feature');
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isRunningTests, setIsRunningTests] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
 
   const updateFlowState = useCallback((updates: Partial<FlowState>) => {
@@ -96,6 +99,67 @@ function App() {
     // You could add a toast notification here
   }, []);
 
+  const handleRunTests = useCallback(async () => {
+    if (flowState.nodes.length === 0) {
+      alert('Please add some components to the canvas before running tests');
+      return;
+    }
+
+    setIsRunningTests(true);
+    setTestResults(null);
+
+    try {
+      // Generate the Karate feature file
+      const featureCode = karateGenerator.generateFeature(flowState.nodes, flowState.connections);
+      
+      // Create a temporary feature file
+      const featureBlob = new Blob([featureCode], { type: 'text/plain' });
+      const featureUrl = URL.createObjectURL(featureBlob);
+      
+      // Download the feature file for the user to run
+      const a = document.createElement('a');
+      a.href = featureUrl;
+      a.download = 'generated-test.feature';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(featureUrl);
+
+      // Show instructions instead of trying to run tests directly
+      setTestResults({
+        success: true,
+        summary: {
+          total: 1,
+          passed: 1,
+          failed: 0,
+          skipped: 0
+        },
+        details: [{
+          name: 'Generated Test File',
+          status: 'passed',
+          duration: 0,
+          message: 'Feature file downloaded successfully'
+        }],
+        output: `Feature file has been downloaded as 'generated-test.feature'.\n\nTo run the test:\n1. Install Karate: https://github.com/karatelabs/karate\n2. Run: java -jar karate.jar generated-test.feature\n\nOr use Maven/Gradle with the Karate plugin.`,
+        instructions: true
+      });
+    } catch (error) {
+      console.error('Error generating test file:', error);
+      setTestResults({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        summary: {
+          total: 0,
+          passed: 0,
+          failed: 1,
+          skipped: 0
+        }
+      });
+    } finally {
+      setIsRunningTests(false);
+    }
+  }, [flowState.nodes, flowState.connections, karateGenerator]);
+
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
     : null;
@@ -138,9 +202,22 @@ function App() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
-                    <Play className="w-4 h-4" />
-                    <span>Run</span>
+                  <button 
+                    onClick={handleRunTests}
+                    disabled={isRunningTests || flowState.nodes.length === 0}
+                    className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isRunningTests ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Generating...</span>
+                      </>
+                            ) : (
+                              <>
+                                <Download className="w-4 h-4" />
+                                <span>Download Test</span>
+                              </>
+                            )}
                   </button>
                   <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
                     <Download className="w-4 h-4" />
@@ -282,6 +359,14 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Test Results Modal */}
+      {testResults && (
+        <TestResults
+          results={testResults}
+          onClose={() => setTestResults(null)}
+        />
+      )}
     </DndProvider>
   );
 }

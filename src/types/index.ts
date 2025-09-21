@@ -78,11 +78,12 @@ export type ComponentCategory =
 export interface PropertyDefinition {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'select' | 'textarea' | 'boolean' | 'json';
+  type: 'text' | 'number' | 'select' | 'textarea' | 'boolean' | 'json' | 'array';
   required: boolean;
   options?: string[];
   placeholder?: string;
   description?: string;
+  arrayItemSchema?: Record<string, any>;
 }
 
 export interface FlowState {
