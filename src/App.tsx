@@ -99,6 +99,36 @@ function App() {
     // You could add a toast notification here
   }, []);
 
+  const handleDownloadTest = useCallback(() => {
+    if (flowState.nodes.length === 0) {
+      alert('Please add some components to the canvas before downloading test');
+      return;
+    }
+
+    try {
+      // Generate the Karate feature file
+      const featureCode = karateGenerator.generateFeature(flowState.nodes, flowState.connections);
+      
+      // Create a temporary feature file
+      const featureBlob = new Blob([featureCode], { type: 'text/plain' });
+      const featureUrl = URL.createObjectURL(featureBlob);
+      
+      // Download the feature file
+      const a = document.createElement('a');
+      a.href = featureUrl;
+      a.download = 'generated-test.feature';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(featureUrl);
+
+      console.log('Test file downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating test file:', error);
+      alert('Error generating test file. Please try again.');
+    }
+  }, [flowState.nodes, flowState.connections, karateGenerator]);
+
   const handleRunTests = useCallback(async () => {
     if (flowState.nodes.length === 0) {
       alert('Please add some components to the canvas before running tests');
@@ -112,20 +142,7 @@ function App() {
       // Generate the Karate feature file
       const featureCode = karateGenerator.generateFeature(flowState.nodes, flowState.connections);
       
-      // Create a temporary feature file
-      const featureBlob = new Blob([featureCode], { type: 'text/plain' });
-      const featureUrl = URL.createObjectURL(featureBlob);
-      
-      // Download the feature file for the user to run
-      const a = document.createElement('a');
-      a.href = featureUrl;
-      a.download = 'generated-test.feature';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(featureUrl);
-
-      // Show instructions instead of trying to run tests directly
+      // Show instructions for running tests
       setTestResults({
         success: true,
         summary: {
@@ -135,16 +152,16 @@ function App() {
           skipped: 0
         },
         details: [{
-          name: 'Generated Test File',
+          name: 'Generated Test Code',
           status: 'passed',
           duration: 0,
-          message: 'Feature file downloaded successfully'
+          message: 'Test code generated successfully'
         }],
-        output: `Feature file has been downloaded as 'generated-test.feature'.\n\nTo run the test:\n1. Install Karate: https://github.com/karatelabs/karate\n2. Run: java -jar karate.jar generated-test.feature\n\nOr use Maven/Gradle with the Karate plugin.`,
+        output: `Test code has been generated.\n\nTo run the test:\n1. Download the test file using the "Download Test" button\n2. Install Karate: https://github.com/karatelabs/karate\n3. Run: java -jar karate.jar generated-test.feature\n\nOr use Maven/Gradle with the Karate plugin.`,
         instructions: true
       });
     } catch (error) {
-      console.error('Error generating test file:', error);
+      console.error('Error generating test code:', error);
       setTestResults({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -203,6 +220,14 @@ function App() {
                 
                 <div className="flex items-center space-x-2">
                   <button 
+                    onClick={handleDownloadTest}
+                    disabled={flowState.nodes.length === 0}
+                    className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download Test</span>
+                  </button>
+                  <button 
                     onClick={handleRunTests}
                     disabled={isRunningTests || flowState.nodes.length === 0}
                     className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -212,12 +237,12 @@ function App() {
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>Generating...</span>
                       </>
-                            ) : (
-                              <>
-                                <Download className="w-4 h-4" />
-                                <span>Download Test</span>
-                              </>
-                            )}
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" />
+                        <span>Run Tests</span>
+                      </>
+                    )}
                   </button>
                   <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
                     <Download className="w-4 h-4" />
