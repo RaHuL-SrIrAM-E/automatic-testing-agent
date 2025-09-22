@@ -8,9 +8,11 @@ import { CodePreview } from './components/CodePreview';
 import { ExampleFlow } from './components/ExampleFlow';
 import { ProjectGenerator } from './components/ProjectGenerator';
 import { TestResults } from './components/TestResults';
+import { ChatInterface } from './components/ChatInterface';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
-import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download } from 'lucide-react';
+import { TestExecutor } from './lib/testExecutor';
+import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle } from 'lucide-react';
 
 const initialFlowState: FlowState = {
   nodes: [],
@@ -25,7 +27,10 @@ function App() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
+  const [testProgress, setTestProgress] = useState<string>('');
+  const [showChatInterface, setShowChatInterface] = useState(false);
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
+  const testExecutor = useMemo(() => new TestExecutor(), []);
 
   const updateFlowState = useCallback((updates: Partial<FlowState>) => {
     setFlowState(prev => {
@@ -137,31 +142,25 @@ function App() {
 
     setIsRunningTests(true);
     setTestResults(null);
+    setTestProgress('Generating test code...');
 
     try {
       // Generate the Karate feature file
       const featureCode = karateGenerator.generateFeature(flowState.nodes, flowState.connections);
       
-      // Show instructions for running tests
-      setTestResults({
-        success: true,
-        summary: {
-          total: 1,
-          passed: 1,
-          failed: 0,
-          skipped: 0
-        },
-        details: [{
-          name: 'Generated Test Code',
-          status: 'passed',
-          duration: 0,
-          message: 'Test code generated successfully'
-        }],
-        output: `Test code has been generated.\n\nTo run the test:\n1. Download the test file using the "Download Test" button\n2. Install Karate: https://github.com/karatelabs/karate\n3. Run: java -jar karate.jar generated-test.feature\n\nOr use Maven/Gradle with the Karate plugin.`,
-        instructions: true
-      });
+      setTestProgress('Preparing test execution...');
+      console.log('Starting test execution...');
+      
+      // Execute the test using TestExecutor
+      setTestProgress('Running tests...');
+      const result = await testExecutor.executeTest(featureCode, 'visual-test');
+      
+      setTestProgress('Processing results...');
+      console.log('Test execution completed:', result);
+      setTestResults(result);
+      setTestProgress('');
     } catch (error) {
-      console.error('Error generating test code:', error);
+      console.error('Error running tests:', error);
       setTestResults({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -170,12 +169,33 @@ function App() {
           passed: 0,
           failed: 1,
           skipped: 0
-        }
+        },
+        details: [{
+          name: 'Test Execution',
+          status: 'failed',
+          duration: 0,
+          error: error instanceof Error ? error.message : 'Unknown error occurred'
+        }],
+        output: ''
       });
     } finally {
       setIsRunningTests(false);
+      setTestProgress('');
     }
-  }, [flowState.nodes, flowState.connections, karateGenerator]);
+  }, [flowState.nodes, flowState.connections, karateGenerator, testExecutor]);
+
+  const handleChatGenerateComponents = useCallback((components: ComponentNode[]) => {
+    // Add generated components to the canvas
+    const newNodes = components.map((component, index) => ({
+      ...component,
+      position: { x: 50 + (index * 250), y: 50 + (index * 150) }
+    }));
+    
+    updateFlowState({ 
+      nodes: [...flowState.nodes, ...newNodes],
+      selectedNodeId: null
+    });
+  }, [flowState.nodes, updateFlowState]);
 
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
@@ -220,6 +240,13 @@ function App() {
                 
                 <div className="flex items-center space-x-2">
                   <button 
+                    onClick={() => setShowChatInterface(true)}
+                    className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>AI Chat</span>
+                  </button>
+                  <button 
                     onClick={handleDownloadTest}
                     disabled={flowState.nodes.length === 0}
                     className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -235,7 +262,7 @@ function App() {
                     {isRunningTests ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Generating...</span>
+                        <span>{testProgress || 'Running...'}</span>
                       </>
                     ) : (
                       <>
@@ -390,6 +417,14 @@ function App() {
         <TestResults
           results={testResults}
           onClose={() => setTestResults(null)}
+        />
+      )}
+
+      {/* Chat Interface Modal */}
+      {showChatInterface && (
+        <ChatInterface
+          onGenerateComponents={handleChatGenerateComponents}
+          onClose={() => setShowChatInterface(false)}
         />
       )}
     </DndProvider>

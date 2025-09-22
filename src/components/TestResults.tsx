@@ -108,6 +108,21 @@ export const TestResults: React.FC<TestResultsProps> = ({ results, onClose }) =>
                 </div>
               </div>
 
+              {/* Test Output */}
+              {results.output && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <span>📄</span>
+                      <span>Test Output</span>
+                    </h3>
+                    <div className="bg-gray-900 text-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                      <pre className="whitespace-pre-wrap">{results.output}</pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Instructions for running tests */}
               {results.instructions && (
                 <div className="space-y-4">
