@@ -1,7 +1,4 @@
-// Browser-compatible test executor
-// This simulates test execution for demonstration purposes
-// In a production environment, you'd integrate with a backend service
-
+// Real test executor that calls the backend API
 export interface TestResult {
   success: boolean;
   summary: {
@@ -23,12 +20,49 @@ export interface TestResult {
 }
 
 export class TestExecutor {
+  private backendUrl: string;
+
+  constructor() {
+    this.backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+  }
+
   async executeTest(featureCode: string, testName: string = 'generated-test'): Promise<TestResult> {
-    console.log('Executing test:', testName);
+    console.log('Executing test via backend API:', testName);
     
-    // Simulate test execution delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    try {
+      const response = await fetch(`${this.backendUrl}/api/run-tests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          featureCode,
+          projectName: testName
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Backend API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('Test execution completed:', result);
+      return result;
+    } catch (error) {
+      console.error('Error calling backend API:', error);
+      
+      // Fallback to mock response if backend is unavailable
+      if (error instanceof Error && error.message.includes('fetch')) {
+        console.log('Backend unavailable, using mock response');
+        return this.getMockResponse(featureCode, testName);
+      }
+      
+      throw error;
+    }
+  }
+
+  private getMockResponse(featureCode: string, testName: string): TestResult {
     // Parse the feature code to determine test scenarios
     const scenarios = this.parseFeatureCode(featureCode);
     
@@ -107,8 +141,8 @@ export class TestExecutor {
   }
 
   private generateTestOutput(scenarios: string[], summary: { passed: number; failed: number; skipped: number; total: number }): string {
-    let output = `Karate Test Execution Report\n`;
-    output += `============================\n\n`;
+    let output = `Karate Test Execution Report (Mock Mode)\n`;
+    output += `========================================\n\n`;
     output += `Test Suite: Generated Visual Test\n`;
     output += `Timestamp: ${new Date().toISOString()}\n\n`;
     
@@ -137,12 +171,27 @@ export class TestExecutor {
     });
     
     output += `Execution completed in ${Math.floor(Math.random() * 5000) + 2000}ms\n`;
+    output += `\nNote: This is a mock response. Backend API is not available.\n`;
     
     return output;
   }
 
   async cleanupAll(): Promise<void> {
-    // No cleanup needed for browser simulation
-    console.log('Test executor cleanup completed');
+    try {
+      const response = await fetch(`${this.backendUrl}/api/cleanup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        console.log('Backend cleanup completed');
+      } else {
+        console.warn('Backend cleanup failed');
+      }
+    } catch (error) {
+      console.warn('Backend cleanup error:', error);
+    }
   }
 }
