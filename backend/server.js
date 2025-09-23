@@ -187,6 +187,21 @@ function generateMockTestComponents() {
       outputs: [],
       inputs: []
     },
+    {
+      id: `mock-get-hello-schema-${Date.now()}`,
+      type: 'SCHEMA_VALIDATION',
+      name: 'Schema Validation for /hello',
+      position: { x: 550, y: 50 },
+      data: {
+        jsonPath: '$.',
+        validationType: 'type_check',
+        schema: 'string',
+        allowNull: false
+      },
+      connections: [],
+      outputs: [],
+      inputs: []
+    },
     
     // GET /hello/{name} endpoint
     {
@@ -211,6 +226,21 @@ function generateMockTestComponents() {
       data: {
         expectedStatus: '200',
         operator: 'equals'
+      },
+      connections: [],
+      outputs: [],
+      inputs: []
+    },
+    {
+      id: `mock-get-hello-name-schema-${Date.now()}`,
+      type: 'SCHEMA_VALIDATION',
+      name: 'Schema Validation for /hello/{name}',
+      position: { x: 550, y: 200 },
+      data: {
+        jsonPath: '$.',
+        validationType: 'type_check',
+        schema: 'string',
+        allowNull: false
       },
       connections: [],
       outputs: [],
@@ -242,6 +272,21 @@ function generateMockTestComponents() {
       data: {
         expectedStatus: '200',
         operator: 'equals'
+      },
+      connections: [],
+      outputs: [],
+      inputs: []
+    },
+    {
+      id: `mock-post-messages-schema-${Date.now()}`,
+      type: 'SCHEMA_VALIDATION',
+      name: 'Schema Validation for /messages',
+      position: { x: 550, y: 350 },
+      data: {
+        jsonPath: '$.',
+        validationType: 'json_schema',
+        schema: '{"type": "object", "properties": {"status": {"type": "string"}, "message": {"type": "string"}}, "required": ["status"]}',
+        allowNull: false
       },
       connections: [],
       outputs: [],
