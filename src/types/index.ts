@@ -12,7 +12,7 @@ export interface ComponentNode {
 export interface ComponentOutput {
   name: string;
   description: string;
-  type: 'string' | 'number' | 'object' | 'array';
+  type: 'string' | 'number' | 'object' | 'array' | 'boolean';
   source: string; // JSONPath or field name
   example?: any;
 }
@@ -20,7 +20,7 @@ export interface ComponentOutput {
 export interface ComponentInput {
   name: string;
   description: string;
-  type: 'string' | 'number' | 'object' | 'array';
+  type: 'string' | 'number' | 'object' | 'array' | 'boolean';
   required: boolean;
   defaultValue?: any;
 }
@@ -49,6 +49,7 @@ export type ComponentType =
   | 'STATUS_ASSERTION'
   | 'JSON_SCHEMA_VALIDATOR'
   | 'FIELD_MATCHER'
+  | 'SCHEMA_VALIDATION'
   | 'RESPONSE_TIME_CHECK'
   | 'VARIABLE_EXTRACTOR'
   | 'DATA_PROVIDER'

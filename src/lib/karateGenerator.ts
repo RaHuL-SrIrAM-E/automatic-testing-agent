@@ -107,9 +107,12 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
       case 'STATUS_ASSERTION':
         this.generateStatusAssertion(node);
         break;
-      case 'FIELD_MATCHER':
-        this.generateFieldMatcher(node);
-        break;
+        case 'FIELD_MATCHER':
+          this.generateFieldMatcher(node);
+          break;
+        case 'SCHEMA_VALIDATION':
+          this.generateSchemaValidation(node);
+          break;
       case 'RESPONSE_TIME_CHECK':
         this.generateResponseTimeCheck(node);
         break;
@@ -338,6 +341,75 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
         break;
       default:
         this.generatedSteps.push(`And match ${jsonPath} == '${expectedValue}'`);
+    }
+  }
+
+  private generateSchemaValidation(node: ComponentNode): void {
+    const data = node.data || node.properties || {};
+    const { jsonPath, schema, validationType, allowNull } = data;
+    
+    if (!jsonPath) {
+      this.generatedSteps.push('* print "Schema Validation: JSON path not configured"');
+      return;
+    }
+
+    switch (validationType) {
+      case 'json_schema':
+        if (!schema) {
+          this.generatedSteps.push('* print "Schema Validation: JSON schema not provided"');
+          return;
+        }
+        try {
+          const schemaObj = JSON.parse(schema);
+          this.generatedSteps.push(`* def schema = ${JSON.stringify(schemaObj)}`);
+          if (allowNull) {
+            this.generatedSteps.push(`* match ${jsonPath} == '#notnull || ${jsonPath} == null'`);
+            this.generatedSteps.push(`* if (${jsonPath} != null) match ${jsonPath} == '#(schema)'`);
+          } else {
+            this.generatedSteps.push(`* match ${jsonPath} == '#(schema)'`);
+          }
+        } catch (error) {
+          this.generatedSteps.push('* print "Schema Validation: Invalid JSON schema provided"');
+        }
+        break;
+        
+      case 'not_null':
+        this.generatedSteps.push(`* match ${jsonPath} == '#notnull'`);
+        break;
+        
+      case 'is_null':
+        this.generatedSteps.push(`* match ${jsonPath} == null`);
+        break;
+        
+      case 'type_check':
+        if (!schema) {
+          this.generatedSteps.push('* print "Schema Validation: Expected type not provided"');
+          return;
+        }
+        const expectedType = schema.toLowerCase();
+        switch (expectedType) {
+          case 'string':
+            this.generatedSteps.push(`* match ${jsonPath} == '#string'`);
+            break;
+          case 'number':
+            this.generatedSteps.push(`* match ${jsonPath} == '#number'`);
+            break;
+          case 'boolean':
+            this.generatedSteps.push(`* match ${jsonPath} == '#boolean'`);
+            break;
+          case 'object':
+            this.generatedSteps.push(`* match ${jsonPath} == '#object'`);
+            break;
+          case 'array':
+            this.generatedSteps.push(`* match ${jsonPath} == '#array'`);
+            break;
+          default:
+            this.generatedSteps.push(`* print "Schema Validation: Unknown type '${expectedType}'"`);
+        }
+        break;
+        
+      default:
+        this.generatedSteps.push('* print "Schema Validation: Unknown validation type"');
     }
   }
 

@@ -433,6 +433,76 @@ export const componentDefinitions: ComponentDefinition[] = [
     ]
   },
   {
+    type: 'SCHEMA_VALIDATION',
+    name: 'Schema Validation',
+    description: 'Validate JSON structure and data types',
+    category: 'VALIDATION',
+    icon: '📋',
+    defaultData: {
+      jsonPath: '',
+      schema: '',
+      validationType: 'json_schema',
+      allowNull: false
+    },
+    properties: [
+      {
+        key: 'jsonPath',
+        label: 'JSON Path',
+        type: 'text',
+        required: true,
+        placeholder: '$.data.user',
+        description: 'JSONPath expression to the field to validate'
+      },
+      {
+        key: 'validationType',
+        label: 'Validation Type',
+        type: 'select',
+        required: true,
+        options: ['json_schema', 'not_null', 'is_null', 'type_check'],
+        description: 'Type of validation to perform'
+      },
+      {
+        key: 'schema',
+        label: 'Schema/Type',
+        type: 'textarea',
+        required: false,
+        placeholder: '{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}',
+        description: 'JSON Schema for validation or expected data type (string, number, boolean, object, array)'
+      },
+      {
+        key: 'allowNull',
+        label: 'Allow Null',
+        type: 'boolean',
+        required: false,
+        description: 'Whether null values are allowed (only for json_schema validation)'
+      }
+    ],
+    outputs: [
+      {
+        name: 'validationResult',
+        description: 'Validation result (true/false)',
+        type: 'boolean',
+        source: 'validationResult',
+        example: true
+      },
+      {
+        name: 'validationMessage',
+        description: 'Validation error message if failed',
+        type: 'string',
+        source: 'validationMessage',
+        example: 'Field is required but was null'
+      }
+    ],
+    inputs: [
+      {
+        name: 'response',
+        description: 'Response data to validate',
+        type: 'object',
+        required: true
+      }
+    ]
+  },
+  {
     type: 'RESPONSE_TIME_CHECK',
     name: 'Response Time',
     description: 'Check response time limits',
