@@ -13,7 +13,7 @@ import { GitHubModal } from './components/GitHubModal';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 import { TestExecutor } from './lib/testExecutor';
-import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle } from 'lucide-react';
+import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 const initialFlowState: FlowState = {
   nodes: [],
@@ -31,6 +31,7 @@ function App() {
   const [testProgress, setTestProgress] = useState<string>('');
   const [showChatInterface, setShowChatInterface] = useState(false);
   const [showGitHubModal, setShowGitHubModal] = useState(false);
+  const [isBottomPanelMinimized, setIsBottomPanelMinimized] = useState(false);
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
   const testExecutor = useMemo(() => new TestExecutor(), []);
 
@@ -397,47 +398,77 @@ function App() {
               </div>
             </div>
             
-            {/* Bottom Panel - Compact Tabs */}
-            <div className="flex-1 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg overflow-hidden">
-              <div className="h-full flex flex-col">
-                {/* Modern Tab Navigation */}
-                <div className="flex border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
-                  <button
-                    onClick={() => setActiveTab('feature')}
-                    className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all duration-200 relative ${
-                      activeTab === 'feature'
-                        ? 'text-red-600 bg-white shadow-sm'
-                        : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
-                    }`}
-                  >
-                    <Code className="w-4 h-4" />
-                    <span>Feature File</span>
-                    {activeTab === 'feature' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-700"></div>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('project')}
-                    className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all duration-200 relative ${
-                      activeTab === 'project'
-                        ? 'text-red-600 bg-white shadow-sm'
-                        : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
-                    }`}
-                  >
-                    <Package className="w-4 h-4" />
-                    <span>Complete Project</span>
-                    {activeTab === 'project' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-700"></div>
-                    )}
-                  </button>
-                </div>
-                
-                {/* Tab Content */}
-                <div className="flex-1 overflow-hidden">
-                  {activeTab === 'feature' ? (
-                    <CodePreview code={flowState.generatedCode} />
-                  ) : (
-                    <ProjectGenerator nodes={flowState.nodes} />
+            {/* Bottom Panel - Compact Tabs with Minimize */}
+            <div className="relative flex-1 overflow-hidden">
+              {/* Sliding Panel Container */}
+              <div className={`absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg transition-all duration-500 ease-in-out ${
+                isBottomPanelMinimized 
+                  ? 'transform translate-y-[calc(100%-3rem)] h-12' 
+                  : 'transform translate-y-0 h-full'
+              }`}>
+                <div className="h-full flex flex-col">
+                  {/* Modern Tab Navigation with Minimize Button */}
+                  <div className="flex border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
+                    <button
+                      onClick={() => setActiveTab('feature')}
+                      className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all duration-200 relative ${
+                        activeTab === 'feature'
+                          ? 'text-red-600 bg-white shadow-sm'
+                          : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
+                      }`}
+                    >
+                      <Code className="w-4 h-4" />
+                      <span>Feature File</span>
+                      {activeTab === 'feature' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-700"></div>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('project')}
+                      className={`flex items-center space-x-2 px-6 py-3 text-sm font-semibold transition-all duration-200 relative ${
+                        activeTab === 'project'
+                          ? 'text-red-600 bg-white shadow-sm'
+                          : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
+                      }`}
+                    >
+                      <Package className="w-4 h-4" />
+                      <span>Complete Project</span>
+                      {activeTab === 'project' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-700"></div>
+                      )}
+                    </button>
+                    
+                    {/* Minimize/Expand Button */}
+                    <div className="flex-1 flex justify-end">
+                      <button
+                        onClick={() => setIsBottomPanelMinimized(!isBottomPanelMinimized)}
+                        className="flex items-center space-x-2 px-4 py-3 text-sm font-semibold text-gray-600 hover:text-red-600 hover:bg-white/50 transition-all duration-200"
+                        title={isBottomPanelMinimized ? 'Expand panel' : 'Minimize panel'}
+                      >
+                        {isBottomPanelMinimized ? (
+                          <>
+                            <ChevronUp className="w-4 h-4" />
+                            <span>Expand</span>
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-4 h-4" />
+                            <span>Minimize</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Tab Content - Only show when not minimized */}
+                  {!isBottomPanelMinimized && (
+                    <div className="flex-1 overflow-hidden">
+                      {activeTab === 'feature' ? (
+                        <CodePreview code={flowState.generatedCode} />
+                      ) : (
+                        <ProjectGenerator nodes={flowState.nodes} />
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
