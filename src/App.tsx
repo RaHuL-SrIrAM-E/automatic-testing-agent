@@ -110,8 +110,30 @@ function App() {
     console.log(`Successfully imported ${nodes.length} requests from "${collectionName}"`);
   }, [flowState.nodes, flowState.connections, karateGenerator]);
 
+  const handleSwaggerImport = useCallback((nodes: ComponentNode[], documentName: string) => {
+    const newFlowState: FlowState = {
+      nodes: [...flowState.nodes, ...nodes],
+      connections: flowState.connections,
+      selectedNodeId: null,
+      generatedCode: ''
+    };
+    
+    // Regenerate code with new nodes
+    newFlowState.generatedCode = karateGenerator.generateFeature(newFlowState.nodes, newFlowState.connections);
+    
+    setFlowState(newFlowState);
+    
+    // Show success message
+    console.log(`Successfully imported ${nodes.length} API endpoints from "${documentName}"`);
+  }, [flowState.nodes, flowState.connections, karateGenerator]);
+
   const handlePostmanError = useCallback((error: string) => {
     console.error('Postman import error:', error);
+    // You could add a toast notification here
+  }, []);
+
+  const handleSwaggerError = useCallback((error: string) => {
+    console.error('Swagger import error:', error);
     // You could add a toast notification here
   }, []);
 
@@ -383,6 +405,8 @@ function App() {
                   <ComponentPalette 
                     onImportPostman={handlePostmanImport}
                     onPostmanError={handlePostmanError}
+                    onImportSwagger={handleSwaggerImport}
+                    onSwaggerError={handleSwaggerError}
                   />
                 </div>
               </>

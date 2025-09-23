@@ -3,6 +3,7 @@ import { useDrag } from 'react-dnd';
 import { getComponentsByCategory } from '../lib/componentDefinitions';
 import { DragItem, ComponentNode } from '../types';
 import { PostmanImporter } from './PostmanImporter';
+import { SwaggerImporter } from './SwaggerImporter';
 
 const ComponentCard: React.FC<{ definition: any }> = ({ definition }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -105,13 +106,18 @@ const CategorySection: React.FC<{ category: string; title: string }> = ({ catego
 interface ComponentPaletteProps {
   onImportPostman?: (nodes: ComponentNode[], collectionName: string) => void;
   onPostmanError?: (error: string) => void;
+  onImportSwagger?: (nodes: ComponentNode[], documentName: string) => void;
+  onSwaggerError?: (error: string) => void;
 }
 
 export const ComponentPalette: React.FC<ComponentPaletteProps> = ({
   onImportPostman,
-  onPostmanError
+  onPostmanError,
+  onImportSwagger,
+  onSwaggerError
 }) => {
   const [showPostmanImporter, setShowPostmanImporter] = useState(false);
+  const [showSwaggerImporter, setShowSwaggerImporter] = useState(false);
 
   const handlePostmanImport = (nodes: ComponentNode[], collectionName: string) => {
     if (onImportPostman) {
@@ -126,26 +132,54 @@ export const ComponentPalette: React.FC<ComponentPaletteProps> = ({
     }
   };
 
+  const handleSwaggerImport = (nodes: ComponentNode[], documentName: string) => {
+    if (onImportSwagger) {
+      onImportSwagger(nodes, documentName);
+    }
+    setShowSwaggerImporter(false);
+  };
+
+  const handleSwaggerError = (error: string) => {
+    if (onSwaggerError) {
+      onSwaggerError(error);
+    }
+  };
+
   return (
     <div className="py-3 space-y-3">
-      {/* Postman Import Section */}
+      {/* Import Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
             Import
           </h3>
-          <button
-            onClick={() => setShowPostmanImporter(!showPostmanImporter)}
-            className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
-          >
-            {showPostmanImporter ? 'Hide' : 'Show'} Postman
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowPostmanImporter(!showPostmanImporter)}
+              className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
+            >
+              {showPostmanImporter ? 'Hide' : 'Show'} Postman
+            </button>
+            <button
+              onClick={() => setShowSwaggerImporter(!showSwaggerImporter)}
+              className="text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
+            >
+              {showSwaggerImporter ? 'Hide' : 'Show'} Swagger
+            </button>
+          </div>
         </div>
         
         {showPostmanImporter && (
           <PostmanImporter
             onImportComplete={handlePostmanImport}
             onError={handlePostmanError}
+          />
+        )}
+        
+        {showSwaggerImporter && (
+          <SwaggerImporter
+            onImportSwagger={handleSwaggerImport}
+            onSwaggerError={handleSwaggerError}
           />
         )}
       </div>
