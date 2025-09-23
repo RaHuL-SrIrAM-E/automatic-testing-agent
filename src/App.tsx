@@ -383,8 +383,8 @@ function App() {
 
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Canvas Area - Optimized Size */}
-            <div className="h-96 p-4 transition-all duration-300">
+            {/* Canvas Area - Dynamic Size with Max Dimensions */}
+            <div className={`${isBottomPanelMinimized ? 'flex-1 max-h-[650px] max-w-[650px] mx-auto' : 'h-96'} p-4 transition-all duration-500 ease-in-out`}>
               <div className="h-full bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden relative">
                 <Canvas
                   nodes={flowState.nodes}
@@ -399,11 +399,11 @@ function App() {
             </div>
             
             {/* Bottom Panel - Compact Tabs with Minimize */}
-            <div className="relative flex-1 overflow-hidden">
+            <div className={`${isBottomPanelMinimized ? 'h-12' : 'flex-1'} relative overflow-hidden transition-all duration-500 ease-in-out`}>
               {/* Sliding Panel Container */}
               <div className={`absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg transition-all duration-500 ease-in-out ${
                 isBottomPanelMinimized 
-                  ? 'transform translate-y-[calc(100%-3rem)] h-12' 
+                  ? 'transform translate-y-0 h-12' 
                   : 'transform translate-y-0 h-full'
               }`}>
                 <div className="h-full flex flex-col">
