@@ -13,7 +13,7 @@ import { GitHubModal } from './components/GitHubModal';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 import { TestExecutor } from './lib/testExecutor';
-import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 
 const initialFlowState: FlowState = {
   nodes: [],
@@ -70,6 +70,14 @@ function App() {
     if (flowState.selectedNodeId === nodeId) {
     }
   }, [flowState.nodes, flowState.selectedNodeId, updateFlowState]);
+
+  const clearCanvas = useCallback(() => {
+    updateFlowState({
+      nodes: [],
+      connections: [],
+      selectedNodeId: null
+    });
+  }, [updateFlowState]);
 
   const selectNode = useCallback((nodeId: string | null) => {
     updateFlowState({
@@ -386,6 +394,15 @@ function App() {
             {/* Canvas Area - Dynamic Size with Max Dimensions */}
             <div className={`${isBottomPanelMinimized ? 'flex-1 max-h-[650px] max-w-[650px] mx-auto' : 'h-96'} p-4 transition-all duration-500 ease-in-out`}>
               <div className="h-full bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-xl overflow-hidden relative">
+                {/* Clear Canvas Button */}
+                <button
+                  onClick={clearCanvas}
+                  className="absolute top-4 right-4 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-200 hover:scale-110 group"
+                  title="Clear Canvas"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                
                 <Canvas
                   nodes={flowState.nodes}
                   connections={flowState.connections}
