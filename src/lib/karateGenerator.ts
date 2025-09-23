@@ -449,15 +449,24 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
 
   private generateVariableSetter(node: ComponentNode): void {
     const data = node.data || node.properties || {};
-    const { variableName, value } = data;
+    const { variables } = data;
     
-    if (!variableName || value === undefined) {
-      this.generatedSteps.push('* print "Variable Setter: Variable name or value not configured"');
+    if (!variables || !Array.isArray(variables) || variables.length === 0) {
+      this.generatedSteps.push('* print "Variable Setter: No variables configured"');
       return;
     }
 
-    this.generatedSteps.push(`* def ${variableName} = '${value}'`);
-    this.variables.set(variableName, value);
+    variables.forEach((variable: any, index: number) => {
+      const { variableName, value } = variable;
+      
+      if (!variableName || value === undefined) {
+        this.generatedSteps.push(`* print "Variable Setter: Variable ${index + 1} not properly configured"`);
+        return;
+      }
+
+      this.generatedSteps.push(`* def ${variableName} = '${value}'`);
+      this.variables.set(variableName, value);
+    });
   }
 
   private formatHeaders(headers: Record<string, any>): string {

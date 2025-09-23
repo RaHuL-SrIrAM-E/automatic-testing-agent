@@ -530,32 +530,53 @@ export const componentDefinitions: ComponentDefinition[] = [
   },
   {
     type: 'VARIABLE_SETTER',
-    name: 'Set Variable',
-    description: 'Set a static variable value',
+    name: 'Set Variables',
+    description: 'Set multiple static variable values',
     category: 'DATA_MANAGEMENT',
     icon: '📝',
     defaultData: {
-      variableName: '',
-      value: ''
+      variables: [
+        {
+          variableName: '',
+          value: ''
+        }
+      ]
     },
     properties: [
       {
-        key: 'variableName',
-        label: 'Variable Name',
-        type: 'text',
+        key: 'variables',
+        label: 'Variable Settings',
+        type: 'array',
         required: true,
-        placeholder: 'baseUrl',
-        description: 'Name of the variable to set'
-      },
-      {
-        key: 'value',
-        label: 'Value',
-        type: 'text',
-        required: true,
-        placeholder: 'https://api.example.com',
-        description: 'The value to assign to the variable'
+        description: 'List of variables to set with their values',
+        arrayItemSchema: {
+          variableName: {
+            type: 'text',
+            label: 'Variable Name',
+            required: true,
+            placeholder: 'baseUrl',
+            description: 'Name of the variable to set'
+          },
+          value: {
+            type: 'text',
+            label: 'Value',
+            required: true,
+            placeholder: 'https://api.example.com',
+            description: 'The value to assign to the variable'
+          }
+        }
       }
-    ]
+    ],
+    outputs: [
+      {
+        name: 'setVariables',
+        description: 'All set variables as an object',
+        type: 'object',
+        source: 'setVariables',
+        example: { baseUrl: 'https://api.example.com', apiVersion: 'v1', timeout: '30000' }
+      }
+    ],
+    inputs: []
   }
 ];
 
