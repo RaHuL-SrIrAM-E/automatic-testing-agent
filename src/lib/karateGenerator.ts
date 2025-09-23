@@ -125,7 +125,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateGetRequest(node: ComponentNode): void {
-    const { url, headers, queryParams, timeout } = node.data;
+    const data = node.data || node.properties || {};
+    const { url, headers, queryParams, timeout } = data;
     
     if (!url) {
       this.generatedSteps.push('* print "GET Request: URL not configured"');
@@ -155,7 +156,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generatePostRequest(node: ComponentNode): void {
-    const { url, headers, body, bodyType } = node.data;
+    const data = node.data || node.properties || {};
+    const { url, headers, body, bodyType } = data;
     
     if (!url) {
       this.generatedSteps.push('* print "POST Request: URL not configured"');
@@ -188,7 +190,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generatePutRequest(node: ComponentNode): void {
-    const { url, headers, body, bodyType } = node.data;
+    const data = node.data || node.properties || {};
+    const { url, headers, body, bodyType } = data;
     
     if (!url) {
       this.generatedSteps.push('* print "PUT Request: URL not configured"');
@@ -221,7 +224,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateDeleteRequest(node: ComponentNode): void {
-    const { url, headers } = node.data;
+    const data = node.data || node.properties || {};
+    const { url, headers } = data;
     
     if (!url) {
       this.generatedSteps.push('* print "DELETE Request: URL not configured"');
@@ -241,7 +245,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateBearerAuth(node: ComponentNode): void {
-    const { token, headerName = 'Authorization' } = node.data;
+    const data = node.data || node.properties || {};
+    const { token, headerName = 'Authorization' } = data;
     
     if (!token) {
       this.generatedSteps.push('* print "Bearer Auth: Token not configured"');
@@ -252,7 +257,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateBasicAuth(node: ComponentNode): void {
-    const { username, password } = node.data;
+    const data = node.data || node.properties || {};
+    const { username, password } = data;
     
     if (!username || !password) {
       this.generatedSteps.push('* print "Basic Auth: Username or password not configured"');
@@ -263,7 +269,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateApiKeyAuth(node: ComponentNode): void {
-    const { key, value, location } = node.data;
+    const data = node.data || node.properties || {};
+    const { key, value, location } = data;
     
     if (!key || !value) {
       this.generatedSteps.push('* print "API Key Auth: Key or value not configured"');
@@ -278,7 +285,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateStatusAssertion(node: ComponentNode): void {
-    const { expectedStatus, operator } = node.data;
+    const data = node.data || node.properties || {};
+    const { expectedStatus, operator } = data;
     
     if (expectedStatus === undefined) {
       this.generatedSteps.push('* print "Status Assertion: Expected status not configured"');
@@ -304,7 +312,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateFieldMatcher(node: ComponentNode): void {
-    const { jsonPath, expectedValue, operator } = node.data;
+    const data = node.data || node.properties || {};
+    const { jsonPath, expectedValue, operator } = data;
     
     if (!jsonPath || !expectedValue) {
       this.generatedSteps.push('* print "Field Matcher: JSON path or expected value not configured"');
@@ -333,7 +342,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateResponseTimeCheck(node: ComponentNode): void {
-    const { maxTime, operator } = node.data;
+    const data = node.data || node.properties || {};
+    const { maxTime, operator } = data;
     
     if (maxTime === undefined) {
       this.generatedSteps.push('* print "Response Time Check: Max time not configured"');
@@ -359,7 +369,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateVariableExtractor(node: ComponentNode): void {
-    const { extractions } = node.data;
+    const data = node.data || node.properties || {};
+    const { extractions } = data;
     
     if (!extractions || !Array.isArray(extractions) || extractions.length === 0) {
       this.generatedSteps.push('* print "Variable Extractor: No extractions configured"');
@@ -403,7 +414,7 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
     const seenVariableNames = new Set<string>();
     
     extractions.forEach((extraction: any, index: number) => {
-      const { variableName, jsonPath, defaultValue } = extraction;
+      const { variableName, jsonPath } = extraction;
       
       // Check if variable name and JSON path are provided
       if (!variableName || !jsonPath) {
@@ -437,7 +448,8 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
   }
 
   private generateVariableSetter(node: ComponentNode): void {
-    const { variableName, value } = node.data;
+    const data = node.data || node.properties || {};
+    const { variableName, value } = data;
     
     if (!variableName || value === undefined) {
       this.generatedSteps.push('* print "Variable Setter: Variable name or value not configured"');

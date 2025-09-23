@@ -3,6 +3,7 @@ export interface ComponentNode {
   type: ComponentType;
   position: { x: number; y: number };
   data: ComponentData;
+  properties?: ComponentData; // Optional for backward compatibility with GitHub-generated components
   connections: string[];
   outputs: ComponentOutput[]; // Output variables this component produces
   inputs: ComponentInput[]; // Input variables this component expects

@@ -9,6 +9,7 @@ import { ExampleFlow } from './components/ExampleFlow';
 import { ProjectGenerator } from './components/ProjectGenerator';
 import { TestResults } from './components/TestResults';
 import { ChatInterface } from './components/ChatInterface';
+import { GitHubModal } from './components/GitHubModal';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 import { TestExecutor } from './lib/testExecutor';
@@ -29,6 +30,7 @@ function App() {
   const [testResults, setTestResults] = useState<any>(null);
   const [testProgress, setTestProgress] = useState<string>('');
   const [showChatInterface, setShowChatInterface] = useState(false);
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
   const karateGenerator = useMemo(() => new KarateGenerator(), []);
   const testExecutor = useMemo(() => new TestExecutor(), []);
 
@@ -197,6 +199,66 @@ function App() {
     });
   }, [flowState.nodes, updateFlowState]);
 
+  const handleGitHubGenerate = useCallback(() => {
+    setShowGitHubModal(true);
+  }, []);
+
+  const handleGitHubGenerateTests = useCallback(async (repoUrl: string, token: string) => {
+    try {
+      setTestProgress('Analyzing GitHub repository...');
+      
+      // Extract owner and repo from URL
+      const urlMatch = repoUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (!urlMatch) {
+        throw new Error('Invalid GitHub URL format');
+      }
+      
+      const [, owner, repo] = urlMatch;
+      
+      // Call backend to analyze repository and generate tests
+      const response = await fetch('http://localhost:3001/api/generate-from-github', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          owner,
+          repo,
+          token
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to analyze repository');
+      }
+      
+      const data = await response.json();
+      
+      setTestProgress('Generating test components...');
+      
+      // Add generated components to canvas
+      const newNodes = data.components.map((component: ComponentNode, index: number) => ({
+        ...component,
+        position: { x: 50 + (index * 250), y: 50 + (index * 150) }
+      }));
+      
+      updateFlowState({
+        nodes: [...flowState.nodes, ...newNodes],
+        selectedNodeId: null
+      });
+      
+      setTestProgress('Test generation completed!');
+      setShowGitHubModal(false);
+      
+      // Clear progress after a delay
+      setTimeout(() => setTestProgress(''), 2000);
+      
+    } catch (error) {
+      console.error('GitHub generation error:', error);
+      setTestProgress(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [flowState.nodes, updateFlowState]);
+
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
     : null;
@@ -275,7 +337,10 @@ function App() {
                     <Download className="w-4 h-4" />
                     <span>Export</span>
                   </button>
-                  <button className="px-6 py-2.5 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-white/30">
+                  <button 
+                    onClick={handleGitHubGenerate}
+                    className="px-6 py-2.5 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-white/30"
+                  >
                     <Zap className="w-4 h-4" />
                     <span>Generate</span>
                   </button>
@@ -425,6 +490,14 @@ function App() {
         <ChatInterface
           onGenerateComponents={handleChatGenerateComponents}
           onClose={() => setShowChatInterface(false)}
+        />
+      )}
+
+      {/* GitHub Generation Modal */}
+      {showGitHubModal && (
+        <GitHubModal
+          onGenerateTests={handleGitHubGenerateTests}
+          onClose={() => setShowGitHubModal(false)}
         />
       )}
     </DndProvider>
