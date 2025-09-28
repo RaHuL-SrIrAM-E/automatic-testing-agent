@@ -17,6 +17,7 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [collectionInfo, setCollectionInfo] = useState<{ name: string; requestCount: number } | null>(null);
+  const [useDynamicExecution, setUseDynamicExecution] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (file: File) => {
@@ -31,22 +32,52 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
     setErrorMessage('');
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const content = e.target?.result as string;
-        const collection = PostmanParser.parseCollection(content);
-        const requests = PostmanParser.extractRequests(collection);
-        const nodes = PostmanParser.generateFlowFromRequests(requests);
+        
+        if (useDynamicExecution) {
+          // Use dynamic execution API
+          const response = await fetch('http://localhost:3001/api/execute-postman-and-infer-schema', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              postmanCollection: content
+            })
+          });
 
-        setCollectionInfo({
-          name: collection.info.name,
-          requestCount: requests.length
-        });
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-        setUploadStatus('success');
-        onImportComplete(nodes, collection.info.name);
+          const result = await response.json();
+          
+          if (!result.success) {
+            throw new Error(result.error || 'Failed to execute Postman requests');
+          }
+
+          onImportComplete(result.components, 'Dynamic Postman Collection');
+          setUploadStatus('success');
+          setErrorMessage(`Successfully executed ${result.components.length} requests and generated components`);
+          
+        } else {
+          // Use static parsing (existing logic)
+          const collection = PostmanParser.parseCollection(content);
+          const requests = PostmanParser.extractRequests(collection);
+          const nodes = PostmanParser.generateFlowFromRequests(requests);
+
+          setCollectionInfo({
+            name: collection.info.name,
+            requestCount: requests.length
+          });
+
+          setUploadStatus('success');
+          onImportComplete(nodes, collection.info.name);
+        }
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Failed to parse Postman collection';
+        const errorMsg = error instanceof Error ? error.message : 'Failed to process collection';
         setErrorMessage(errorMsg);
         setUploadStatus('error');
         onError(errorMsg);
@@ -114,6 +145,29 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
         <div>
           <h3 className="text-lg font-bold text-gray-900">Import Postman Collection</h3>
           <p className="text-sm text-gray-600">Upload your Postman collection to generate Karate tests</p>
+        </div>
+      </div>
+
+      {/* Dynamic Execution Toggle */}
+      <div className="mb-4 p-3 bg-white/50 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-semibold text-gray-800">Execution Mode</h4>
+            <p className="text-xs text-gray-600">
+              {useDynamicExecution 
+                ? 'Execute requests and infer schemas dynamically' 
+                : 'Parse collection statically (faster)'}
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useDynamicExecution}
+              onChange={(e) => setUseDynamicExecution(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const axios = require('axios');
+const jsonSchemaGenerator = require('json-schema-generator');
 const { v4: uuidv4 } = require('uuid');
 
 const execAsync = promisify(exec);
@@ -23,6 +24,260 @@ const tempDir = path.join(__dirname, 'temp');
 
 // Ensure temp directory exists
 fs.ensureDirSync(tempDir);
+
+// Dynamic Postman execution and schema inference endpoint
+app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
+  try {
+    const { postmanCollection } = req.body;
+    
+    if (!postmanCollection) {
+      return res.status(400).json({
+        success: false,
+        error: 'Postman collection is required'
+      });
+    }
+
+    console.log('Executing Postman requests and inferring schemas...');
+    
+    // Parse Postman collection
+    const collection = JSON.parse(postmanCollection);
+    const requests = extractRequestsFromCollection(collection);
+    
+    if (requests.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No valid requests found in Postman collection'
+      });
+    }
+
+    const components = [];
+    
+    // Execute each request and infer schema
+    for (let i = 0; i < requests.length; i++) {
+      const request = requests[i];
+      console.log(`Executing request ${i + 1}/${requests.length}: ${request.method} ${request.url}`);
+      
+      try {
+        // Execute the actual API call
+        const response = await executePostmanRequest(request);
+        
+        // Infer schema from response
+        const inferredSchema = inferSchemaFromResponse(response.data);
+        
+        // Create Karate components
+        const requestComponent = createRequestComponent(request, i);
+        const statusComponent = createStatusComponent(response.status, i);
+        const schemaComponent = createSchemaComponent(inferredSchema, i);
+        
+        components.push(requestComponent, statusComponent, schemaComponent);
+        
+        console.log(`✅ Successfully processed: ${request.method} ${request.url}`);
+        
+      } catch (error) {
+        console.error(`❌ Failed to execute ${request.method} ${request.url}:`, error.message);
+        
+        // Still create components but without schema validation
+        const requestComponent = createRequestComponent(request, i);
+        const statusComponent = createStatusComponent(500, i); // Default to error status
+        
+        components.push(requestComponent, statusComponent);
+      }
+    }
+    
+    console.log(`Generated ${components.length} components from ${requests.length} requests`);
+    
+    res.json({
+      success: true,
+      components: components,
+      message: `Successfully processed ${requests.length} requests and generated ${components.length} components`
+    });
+    
+  } catch (error) {
+    console.error('Error in dynamic Postman execution:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Helper function to extract requests from Postman collection
+function extractRequestsFromCollection(collection) {
+  const requests = [];
+  
+  function processItems(items) {
+    if (!items || !Array.isArray(items)) return;
+    
+    items.forEach(item => {
+      if (item.request) {
+        // This is a request item
+        const request = {
+          name: item.name || 'Unnamed Request',
+          method: item.request.method || 'GET',
+          url: buildUrl(item.request.url),
+          headers: buildHeaders(item.request.header),
+          body: buildBody(item.request.body),
+          auth: item.request.auth
+        };
+        requests.push(request);
+      } else if (item.item) {
+        // This is a folder, process recursively
+        processItems(item.item);
+      }
+    });
+  }
+  
+  if (collection.item) {
+    processItems(collection.item);
+  }
+  
+  return requests;
+}
+
+// Helper function to build URL from Postman URL object
+function buildUrl(urlObj) {
+  if (typeof urlObj === 'string') {
+    return urlObj;
+  }
+  
+  if (urlObj.raw) {
+    return urlObj.raw;
+  }
+  
+  let url = '';
+  if (urlObj.protocol) url += urlObj.protocol + '://';
+  if (urlObj.host) url += urlObj.host.join('.');
+  if (urlObj.port) url += ':' + urlObj.port;
+  if (urlObj.path) url += '/' + urlObj.path.join('/');
+  
+  return url;
+}
+
+// Helper function to build headers from Postman headers
+function buildHeaders(headers) {
+  if (!headers || !Array.isArray(headers)) return {};
+  
+  const headerObj = {};
+  headers.forEach(header => {
+    if (header.key && header.value) {
+      headerObj[header.key] = header.value;
+    }
+  });
+  
+  return headerObj;
+}
+
+// Helper function to build request body
+function buildBody(bodyObj) {
+  if (!bodyObj) return null;
+  
+  if (bodyObj.mode === 'raw' && bodyObj.raw) {
+    return bodyObj.raw;
+  }
+  
+  if (bodyObj.mode === 'formdata' && bodyObj.formdata) {
+    const formData = {};
+    bodyObj.formdata.forEach(item => {
+      if (item.key && item.value) {
+        formData[item.key] = item.value;
+      }
+    });
+    return JSON.stringify(formData);
+  }
+  
+  return null;
+}
+
+// Helper function to execute Postman request
+async function executePostmanRequest(request) {
+  const config = {
+    method: request.method.toLowerCase(),
+    url: request.url,
+    headers: {
+      'Content-Type': 'application/json',
+      ...request.headers
+    },
+    timeout: 10000 // 10 second timeout
+  };
+  
+  if (request.body && (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH')) {
+    config.data = request.body;
+  }
+  
+  return await axios(config);
+}
+
+// Helper function to infer schema from response
+function inferSchemaFromResponse(responseData) {
+  try {
+    // Use json-schema-generator to infer schema
+    const schema = jsonSchemaGenerator(responseData);
+    return schema;
+  } catch (error) {
+    console.error('Error inferring schema:', error);
+    // Fallback to basic type check
+    return {
+      type: Array.isArray(responseData) ? 'array' : typeof responseData
+    };
+  }
+}
+
+// Helper function to create request component
+function createRequestComponent(request, index) {
+  const componentType = request.method.toUpperCase() + '_REQUEST';
+  
+  return {
+    id: `dynamic-${request.method.toLowerCase()}-${index}-${Date.now()}`,
+    type: componentType,
+    name: `${request.method} ${request.name}`,
+    position: { x: 50 + (index * 300), y: 50 },
+    data: {
+      url: request.url,
+      headers: JSON.stringify(request.headers),
+      timeout: '10000',
+      ...(request.body && { body: request.body, bodyType: 'json' })
+    },
+    connections: [],
+    outputs: [],
+    inputs: []
+  };
+}
+
+// Helper function to create status component
+function createStatusComponent(status, index) {
+  return {
+    id: `dynamic-status-${index}-${Date.now()}`,
+    type: 'STATUS_ASSERTION',
+    name: `Status ${status}`,
+    position: { x: 200 + (index * 300), y: 50 },
+    data: {
+      expectedStatus: status.toString(),
+      operator: 'equals'
+    },
+    connections: [],
+    outputs: [],
+    inputs: []
+  };
+}
+
+// Helper function to create schema component
+function createSchemaComponent(schema, index) {
+  return {
+    id: `dynamic-schema-${index}-${Date.now()}`,
+    type: 'SCHEMA_VALIDATION',
+    name: 'Schema Validation',
+    position: { x: 350 + (index * 300), y: 50 },
+    data: {
+      jsonPath: '$.',
+      validationType: 'json_schema',
+      schema: JSON.stringify(schema, null, 2),
+      allowNull: false
+    },
+    connections: [],
+    outputs: [],
+    inputs: []
+  };
+}
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
