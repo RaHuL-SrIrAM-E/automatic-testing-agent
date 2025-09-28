@@ -5,7 +5,6 @@ import { ComponentPalette } from './components/ComponentPalette';
 import { Canvas } from './components/Canvas';
 import { PropertiesPanel } from './components/PropertiesPanel';
 import { CodePreview } from './components/CodePreview';
-import { ExampleFlow } from './components/ExampleFlow';
 import { ProjectGenerator } from './components/ProjectGenerator';
 import { TestResults } from './components/TestResults';
 import { ChatInterface } from './components/ChatInterface';
@@ -85,14 +84,6 @@ function App() {
       selectedNodeId: nodeId
     });
   }, [updateFlowState]);
-
-  const loadFlow = useCallback((loadedFlowState: FlowState) => {
-    setFlowState({
-      ...loadedFlowState,
-      generatedCode: karateGenerator.generateFeature(loadedFlowState.nodes, loadedFlowState.connections),
-      selectedNodeId: null
-    });
-  }, [karateGenerator]);
 
   const handlePostmanImport = useCallback((nodes: ComponentNode[], collectionName: string) => {
     const newFlowState: FlowState = {
@@ -469,11 +460,6 @@ function App() {
           <div className={`${showSidebar ? 'w-80' : 'w-0'} transition-all duration-300 overflow-hidden bg-white/60 backdrop-blur-xl border-r border-gray-200/50 flex flex-col relative z-40 h-full`}>
             {showSidebar && (
               <>
-                {/* Demo Section - Compact */}
-                <div className="p-4 border-b border-gray-200/50">
-                  <ExampleFlow onLoadFlow={loadFlow} />
-                </div>
-                
                 {/* Components Section */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                   <div className="p-4 border-b border-gray-200/50">
