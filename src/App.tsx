@@ -13,7 +13,8 @@ import { GitHubModal } from './components/GitHubModal';
 import { ComponentNode, FlowState } from './types';
 import { KarateGenerator } from './lib/karateGenerator';
 import { TestExecutor } from './lib/testExecutor';
-import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { exportFlowAsJson, importFlowStateFromJson } from './utils/flowUtils';
+import { Settings, Code, Package, Menu, X, Layers, Zap, Play, Download, MessageCircle, ChevronDown, ChevronUp, Trash2, Upload } from 'lucide-react';
 
 const initialFlowState: FlowState = {
   nodes: [],
@@ -290,6 +291,78 @@ function App() {
     }
   }, [flowState.nodes, updateFlowState]);
 
+  const handleExportFlow = useCallback(() => {
+    if (flowState.nodes.length === 0) {
+      alert('No components to export. Please add some components to the canvas first.');
+      return;
+    }
+
+    try {
+      const flowData = {
+        version: '1.0.0',
+        nodes: flowState.nodes,
+        connections: flowState.connections,
+        exportedAt: new Date().toISOString(),
+        metadata: {
+          totalNodes: flowState.nodes.length,
+          totalConnections: flowState.connections.length,
+          generatedCode: flowState.generatedCode
+        }
+      };
+
+      const jsonString = JSON.stringify(flowData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `karate-flow-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      console.log('Flow exported successfully');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export flow. Please try again.');
+    }
+  }, [flowState]);
+
+  const handleImportFlow = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const importedState = importFlowStateFromJson(content);
+          
+          if (importedState.nodes.length === 0) {
+            alert('No valid flow data found in the file.');
+            return;
+          }
+
+          // Regenerate code for imported flow
+          importedState.generatedCode = karateGenerator.generateFeature(importedState.nodes, importedState.connections);
+          
+          setFlowState(importedState);
+          console.log(`Successfully imported ${importedState.nodes.length} components and ${importedState.connections.length} connections`);
+        } catch (error) {
+          console.error('Import failed:', error);
+          alert('Failed to import flow. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }, [karateGenerator]);
+
   const selectedNode = flowState.selectedNodeId 
     ? flowState.nodes.find(node => node.id === flowState.selectedNodeId) || null
     : null;
@@ -364,9 +437,19 @@ function App() {
                       </>
                     )}
                   </button>
-                  <button className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2">
+                  <button 
+                    onClick={handleExportFlow}
+                    className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2"
+                  >
                     <Download className="w-4 h-4" />
                     <span>Export</span>
+                  </button>
+                  <button 
+                    onClick={handleImportFlow}
+                    className="px-4 py-2.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Import</span>
                   </button>
                   <button 
                     onClick={handleGitHubGenerate}

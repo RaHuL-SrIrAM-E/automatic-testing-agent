@@ -43,7 +43,7 @@ export const importFlowStateFromJson = (jsonString: string): FlowState => {
       nodes: data.nodes || [],
       connections: data.connections || [],
       selectedNodeId: null,
-      generatedCode: ''
+      generatedCode: data.metadata?.generatedCode || ''
     };
   } catch (error) {
     console.error('Failed to import flow state:', error);
