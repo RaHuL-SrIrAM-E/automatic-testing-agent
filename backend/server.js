@@ -344,7 +344,11 @@ async function executePostmanRequest(request) {
     validateStatus: function (status) {
       // Accept any status code (don't throw for 4xx/5xx)
       return true;
-    }
+    },
+    // Disable SSL certificate verification for development (handles self-signed certs)
+    httpsAgent: new (require('https').Agent)({
+      rejectUnauthorized: false
+    })
   };
   
   if (request.body && (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH')) {
