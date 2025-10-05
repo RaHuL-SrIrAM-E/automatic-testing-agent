@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { PostmanParser } from '../lib/postmanParser';
 import { ComponentNode } from '../types';
 
@@ -14,7 +14,7 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error' | 'warning'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [collectionInfo, setCollectionInfo] = useState<{ name: string; requestCount: number } | null>(null);
   const [useDynamicExecution, setUseDynamicExecution] = useState(false);
@@ -59,8 +59,22 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
           }
 
           onImportComplete(result.components, 'Dynamic Postman Collection');
-          setUploadStatus('success');
-          setErrorMessage(`Successfully executed ${result.components.length} requests and generated components`);
+          
+          // Show detailed message with stats
+          if (result.stats) {
+            const { totalRequests, successful, failed, totalComponents } = result.stats;
+            setErrorMessage(`${totalRequests} requests processed: ${successful} successful, ${failed} failed. Generated ${totalComponents} components.`);
+            
+            // Set status based on whether there were failures
+            if (failed > 0) {
+              setUploadStatus('warning');
+            } else {
+              setUploadStatus('success');
+            }
+          } else {
+            setErrorMessage(result.message || `Successfully executed ${result.components.length} requests and generated components`);
+            setUploadStatus('success');
+          }
           
         } else {
           // Use static parsing (existing logic)
@@ -178,6 +192,8 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
             ? 'border-blue-400 bg-blue-50 scale-105'
             : uploadStatus === 'success'
             ? 'border-green-400 bg-green-50'
+            : uploadStatus === 'warning'
+            ? 'border-yellow-400 bg-yellow-50'
             : uploadStatus === 'error'
             ? 'border-red-400 bg-red-50'
             : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
@@ -210,6 +226,21 @@ export const PostmanImporter: React.FC<PostmanImporterProps> = ({
                 <p>{collectionInfo.requestCount} requests found</p>
               </div>
             )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                resetUpload();
+              }}
+              className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            >
+              Import Another
+            </button>
+          </div>
+        ) : uploadStatus === 'warning' ? (
+          <div className="flex flex-col items-center space-y-3">
+            <AlertTriangle className="w-8 h-8 text-yellow-500" />
+            <p className="text-sm font-medium text-yellow-700">Collection imported with warnings!</p>
+            <p className="text-xs text-gray-600 text-center">{errorMessage}</p>
             <button
               onClick={(e) => {
                 e.stopPropagation();

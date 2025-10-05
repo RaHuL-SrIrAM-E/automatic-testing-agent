@@ -30,7 +30,11 @@ app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
   try {
     const { postmanCollection } = req.body;
     
+    console.log('🔍 Starting dynamic Postman execution...');
+    console.log('📋 Postman collection received:', typeof postmanCollection, postmanCollection ? 'valid' : 'null/empty');
+    
     if (!postmanCollection) {
+      console.error('❌ No Postman collection provided');
       return res.status(400).json({
         success: false,
         error: 'Postman collection is required'
@@ -40,10 +44,22 @@ app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
     console.log('Executing Postman requests and inferring schemas...');
     
     // Parse Postman collection
+    console.log('📖 Parsing Postman collection...');
     const collection = JSON.parse(postmanCollection);
+    console.log('✅ Collection parsed successfully. Info:', {
+      name: collection.info?.name,
+      version: collection.info?.schemaVersion,
+      hasItems: !!collection.item
+    });
+    
     const requests = extractRequestsFromCollection(collection);
+    console.log('🔍 Extracted requests:', requests.length);
+    requests.forEach((req, index) => {
+      console.log(`  Request ${index + 1}: ${req.method} ${req.url}`);
+    });
     
     if (requests.length === 0) {
+      console.error('❌ No valid requests found in collection');
       return res.status(400).json({
         success: false,
         error: 'No valid requests found in Postman collection'
@@ -55,19 +71,46 @@ app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
     // Execute each request and infer schema
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
-      console.log(`Executing request ${i + 1}/${requests.length}: ${request.method} ${request.url}`);
+      console.log(`\n🚀 Executing request ${i + 1}/${requests.length}: ${request.method} ${request.url}`);
+      console.log('📋 Request details:', {
+        method: request.method,
+        url: request.url,
+        hasHeaders: !!request.headers,
+        hasBody: !!request.body,
+        headers: request.headers
+      });
       
       try {
         // Execute the actual API call
+        console.log('🌐 Making HTTP request...');
         const response = await executePostmanRequest(request);
+        console.log('✅ HTTP request successful:', {
+          status: response.status,
+          statusText: response.statusText,
+          hasData: !!response.data,
+          dataType: typeof response.data,
+          dataPreview: response.data ? JSON.stringify(response.data).substring(0, 100) + '...' : 'null'
+        });
         
         // Infer schema from response
+        console.log('🧠 Inferring schema from response...');
         const inferredSchema = inferSchemaFromResponse(response.data);
+        console.log('✅ Schema inferred:', {
+          schemaType: typeof inferredSchema,
+          schemaPreview: JSON.stringify(inferredSchema).substring(0, 200) + '...'
+        });
         
         // Create Karate components
+        console.log('🔧 Creating Karate components...');
         const requestComponent = createRequestComponent(request, i);
         const statusComponent = createStatusComponent(response.status, i);
         const schemaComponent = createSchemaComponent(inferredSchema, i);
+        
+        console.log('✅ Components created:', {
+          requestComponent: requestComponent.type,
+          statusComponent: statusComponent.type,
+          schemaComponent: schemaComponent.type
+        });
         
         components.push(requestComponent, statusComponent, schemaComponent);
         
@@ -75,25 +118,79 @@ app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
         
       } catch (error) {
         console.error(`❌ Failed to execute ${request.method} ${request.url}:`, error.message);
+        console.error('🔍 Error details:', {
+          name: error.name,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          responseData: error.response?.data ? JSON.stringify(error.response.data).substring(0, 200) : 'none'
+        });
         
-        // Still create components but without schema validation
+        // Determine the appropriate status code based on error type
+        let errorStatus = 500;
+        let errorMessage = 'Unknown error';
+        
+        if (error.response) {
+          // HTTP error response
+          errorStatus = error.response.status;
+          errorMessage = `HTTP ${errorStatus}: ${error.response.statusText}`;
+        } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+          // Network/connection errors
+          errorStatus = 503;
+          errorMessage = 'Service unavailable - endpoint not reachable';
+        } else if (error.code === 'ETIMEDOUT') {
+          // Timeout errors
+          errorStatus = 408;
+          errorMessage = 'Request timeout';
+        } else {
+          errorMessage = error.message;
+        }
+        
+        console.log('🔧 Creating error components with status:', errorStatus);
+        
+        // Still create components but with appropriate error status
         const requestComponent = createRequestComponent(request, i);
-        const statusComponent = createStatusComponent(500, i); // Default to error status
+        const statusComponent = createStatusComponent(errorStatus, i);
+        
+        // Add error information to the request component
+        requestComponent.data.errorInfo = {
+          status: errorStatus,
+          message: errorMessage,
+          timestamp: new Date().toISOString()
+        };
         
         components.push(requestComponent, statusComponent);
       }
     }
     
-    console.log(`Generated ${components.length} components from ${requests.length} requests`);
+    console.log(`\n📊 Final results: Generated ${components.length} components from ${requests.length} requests`);
+    
+    // Count successful vs failed requests
+    const successfulRequests = components.filter(c => !c.data.errorInfo).length / 3; // Each successful request creates 3 components
+    const failedRequests = requests.length - successfulRequests;
+    
+    let message = `Processed ${requests.length} requests: ${successfulRequests} successful, ${failedRequests} failed`;
+    if (failedRequests > 0) {
+      message += '. Failed requests still generate test components for manual validation.';
+    }
+    
+    console.log('📈 Stats:', { totalRequests: requests.length, successful: successfulRequests, failed: failedRequests });
     
     res.json({
       success: true,
       components: components,
-      message: `Successfully processed ${requests.length} requests and generated ${components.length} components`
+      message: message,
+      stats: {
+        totalRequests: requests.length,
+        successful: successfulRequests,
+        failed: failedRequests,
+        totalComponents: components.length
+      }
     });
     
   } catch (error) {
-    console.error('Error in dynamic Postman execution:', error);
+    console.error('💥 Critical error in dynamic Postman execution:', error);
+    console.error('🔍 Error stack:', error.stack);
     res.status(500).json({
       success: false,
       error: error.message
@@ -103,14 +200,25 @@ app.post('/api/execute-postman-and-infer-schema', async (req, res) => {
 
 // Helper function to extract requests from Postman collection
 function extractRequestsFromCollection(collection) {
+  console.log('🔍 Starting request extraction from collection...');
   const requests = [];
   
   function processItems(items) {
+    console.log('📁 Processing items:', items ? items.length : 'null/undefined');
     if (!items || !Array.isArray(items)) return;
     
-    items.forEach(item => {
+    items.forEach((item, index) => {
+      console.log(`  Item ${index + 1}:`, {
+        name: item.name,
+        hasRequest: !!item.request,
+        hasItems: !!item.item,
+        requestMethod: item.request?.method,
+        requestUrl: item.request?.url
+      });
+      
       if (item.request) {
         // This is a request item
+        console.log('✅ Found request item:', item.name);
         const request = {
           name: item.name || 'Unnamed Request',
           method: item.request.method || 'GET',
@@ -119,28 +227,44 @@ function extractRequestsFromCollection(collection) {
           body: buildBody(item.request.body),
           auth: item.request.auth
         };
+        console.log('🔧 Built request object:', {
+          name: request.name,
+          method: request.method,
+          url: request.url,
+          hasHeaders: !!request.headers,
+          hasBody: !!request.body
+        });
         requests.push(request);
       } else if (item.item) {
         // This is a folder, process recursively
+        console.log('📂 Found folder, processing recursively...');
         processItems(item.item);
       }
     });
   }
   
   if (collection.item) {
+    console.log('📋 Collection has items, processing...');
     processItems(collection.item);
+  } else {
+    console.log('⚠️ Collection has no items');
   }
   
+  console.log('📊 Extraction complete. Total requests found:', requests.length);
   return requests;
 }
 
 // Helper function to build URL from Postman URL object
 function buildUrl(urlObj) {
+  console.log('🔗 Building URL from:', typeof urlObj, urlObj);
+  
   if (typeof urlObj === 'string') {
+    console.log('✅ URL is string, returning as-is:', urlObj);
     return urlObj;
   }
   
   if (urlObj.raw) {
+    console.log('✅ URL has raw property:', urlObj.raw);
     return urlObj.raw;
   }
   
@@ -150,6 +274,7 @@ function buildUrl(urlObj) {
   if (urlObj.port) url += ':' + urlObj.port;
   if (urlObj.path) url += '/' + urlObj.path.join('/');
   
+  console.log('🔧 Built URL from parts:', url);
   return url;
 }
 
@@ -190,6 +315,24 @@ function buildBody(bodyObj) {
 
 // Helper function to execute Postman request
 async function executePostmanRequest(request) {
+  console.log('🌐 Executing Postman request:', {
+    method: request.method,
+    url: request.url,
+    hasHeaders: !!request.headers,
+    hasBody: !!request.body
+  });
+  
+  // Validate URL
+  if (!request.url || !request.url.startsWith('http')) {
+    console.error('❌ Invalid URL:', request.url);
+    throw new Error('Invalid URL: URL must start with http:// or https://');
+  }
+  
+  // Check for common issues
+  if (request.url.includes('localhost') && !request.url.includes('127.0.0.1')) {
+    console.warn(`⚠️ Warning: Using localhost URL ${request.url} - this may not be accessible from the server`);
+  }
+  
   const config = {
     method: request.method.toLowerCase(),
     url: request.url,
@@ -197,14 +340,43 @@ async function executePostmanRequest(request) {
       'Content-Type': 'application/json',
       ...request.headers
     },
-    timeout: 10000 // 10 second timeout
+    timeout: 10000, // 10 second timeout
+    validateStatus: function (status) {
+      // Accept any status code (don't throw for 4xx/5xx)
+      return true;
+    }
   };
   
   if (request.body && (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH')) {
     config.data = request.body;
+    console.log('📦 Added request body:', typeof request.body);
   }
   
-  return await axios(config);
+  console.log('🔧 Axios config:', {
+    method: config.method,
+    url: config.url,
+    timeout: config.timeout,
+    hasData: !!config.data,
+    headers: config.headers
+  });
+  
+  console.log('🚀 Making HTTP request...');
+  const response = await axios(config);
+  console.log('📡 Response received:', {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    hasData: !!response.data
+  });
+  
+  // Check if response indicates an error
+  if (response.status >= 400) {
+    console.error('❌ HTTP error response:', response.status, response.statusText);
+    throw new Error(`HTTP ${response.status}: ${response.statusText || 'Request failed'}`);
+  }
+  
+  console.log('✅ Request successful');
+  return response;
 }
 
 // Helper function to infer schema from response
