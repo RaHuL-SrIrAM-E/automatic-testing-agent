@@ -8,10 +8,22 @@ const axios = require('axios');
 const jsonSchemaGenerator = require('json-schema-generator');
 const { v4: uuidv4 } = require('uuid');
 
+// Load environment variables from .env file
+try {
+  require('dotenv').config();
+  console.log('✅ Loaded environment variables from .env file');
+} catch (error) {
+  console.log('⚠️  dotenv not installed, using default values');
+}
+
 const execAsync = promisify(exec);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Gemini AI Configuration
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBvGkLqP9mJ8XrK3qXw5YzP6N7M8Q9R0S1T2U3V4W5X6Y7Z8A9B0C1D2E3F4';
 
 // Middleware
 app.use(cors());
@@ -571,19 +583,156 @@ async function analyzeRepositoryForAPIs(owner, repo, token, contents) {
 // Generate test components from API analysis using LLM
 async function generateTestComponentsFromAPIs(apiFiles, repoInfo) {
   try {
-    console.log('Generating test components from APIs...');
+    console.log('Generating test components from APIs using Gemini AI...');
     console.log('API Files found:', apiFiles.length);
     console.log('Repository info:', repoInfo.name, repoInfo.language);
     
-    // For demo purposes, return mock components based on the specified endpoints
-    console.log('Using mock generation for demo purposes');
-    return generateMockTestComponents();
+    // If no API files found, return mock components
+    if (apiFiles.length === 0) {
+      console.log('No API files found, using mock components');
+      return generateMockTestComponents();
+    }
+    
+    // Download and analyze actual code files
+    console.log('Downloading and analyzing code files...');
+    const codeAnalysis = await downloadAndAnalyzeCodeFiles(apiFiles);
+    
+    // Use Gemini AI to generate test components
+    console.log('Calling Gemini AI to generate test components...');
+    const components = await callGeminiAI(codeAnalysis, repoInfo);
+    
+    console.log(`✅ Generated ${components.length} test components from AI analysis`);
+    return components;
     
   } catch (error) {
     console.error('LLM generation error:', error);
+    console.log('Falling back to mock components');
     
     // Fallback: Generate basic test components
-    return generateFallbackTestComponents(apiFiles);
+    return generateMockTestComponents();
+  }
+}
+
+// Download and analyze code files from GitHub
+async function downloadAndAnalyzeCodeFiles(apiFiles) {
+  const codeFiles = [];
+  
+  for (const file of apiFiles.slice(0, 5)) { // Limit to 5 files to avoid token limits
+    try {
+      console.log(`  Downloading ${file.name}...`);
+      const response = await axios.get(file.download_url);
+      const code = response.data;
+      
+      codeFiles.push({
+        name: file.name,
+        path: file.path,
+        code: code,
+        language: file.name.split('.').pop()
+      });
+    } catch (error) {
+      console.error(`  Failed to download ${file.name}:`, error.message);
+    }
+  }
+  
+  return codeFiles;
+}
+
+// Call Gemini AI to generate test components
+async function callGeminiAI(codeAnalysis, repoInfo) {
+  try {
+    // Build prompt with code analysis
+    let prompt = `You are a test automation expert. Analyze the following API code and generate Karate test components.
+
+Repository: ${repoInfo.name}
+Language: ${repoInfo.language}
+
+API Code Files:
+`;
+
+    codeAnalysis.forEach((file, index) => {
+      prompt += `\n--- File ${index + 1}: ${file.name} ---\n`;
+      prompt += file.code.substring(0, 2000); // Limit to 2000 chars per file
+      prompt += '\n';
+    });
+
+    prompt += `\nGenerate Karate test components in JSON format. For each API endpoint found, create:
+1. HTTP Request component (GET_REQUEST, POST_REQUEST, etc.)
+2. Status Assertion component
+3. Schema Validation component (if response has data)
+
+Return ONLY a JSON array of components with this exact structure:
+[
+  {
+    "id": "unique-id",
+    "type": "GET_REQUEST",
+    "name": "Descriptive name",
+    "position": {"x": 50, "y": 50},
+    "data": {
+      "url": "full-url",
+      "headers": "{\\"Content-Type\\": \\"application/json\\"}",
+      "timeout": "5000"
+    },
+    "connections": [],
+    "outputs": [],
+    "inputs": []
+  }
+]
+
+Analyze the code carefully and generate realistic test components based on actual endpoints found.`;
+
+    // Call Gemini API
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+      {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    // Extract response text
+    const responseText = response.data.candidates[0].content.parts[0].text;
+    console.log('Gemini AI Response:', responseText.substring(0, 500));
+
+    // Parse JSON from response (handle markdown code blocks)
+    let jsonText = responseText.trim();
+    
+    // Remove markdown code blocks if present
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    }
+    
+    // Remove any leading/trailing text before/after JSON
+    const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+
+    const components = JSON.parse(jsonText);
+    
+    // Ensure components have all required fields
+    return components.map((comp, index) => ({
+      ...comp,
+      id: comp.id || `ai-generated-${Date.now()}-${index}`,
+      position: comp.position || { x: 50 + (index * 250), y: 50 },
+      connections: comp.connections || [],
+      outputs: comp.outputs || [],
+      inputs: comp.inputs || []
+    }));
+
+  } catch (error) {
+    console.error('Gemini AI call failed:', error.message);
+    if (error.response) {
+      console.error('API Response:', error.response.data);
+    }
+    throw error;
   }
 }
 
