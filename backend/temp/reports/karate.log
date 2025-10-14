@@ -1,0 +1,32 @@
+09:48:35.973 [main]  INFO  com.intuit.karate - Karate version: 1.4.1
+09:48:36.622 [main]  DEBUG com.intuit.karate - request:
+1 > GET https://httpbin.org/get
+1 > Host: httpbin.org
+1 > Connection: Keep-Alive
+1 > User-Agent: Apache-HttpClient/4.5.14 (Java/21.0.6)
+1 > Accept-Encoding: gzip,deflate
+
+
+09:48:37.846 [main]  DEBUG com.intuit.karate - response time in milliseconds: 1219
+1 < 200
+1 < Date: Tue, 14 Oct 2025 04:18:37 GMT
+1 < Content-Type: application/json
+1 < Content-Length: 301
+1 < Connection: keep-alive
+1 < Server: gunicorn/19.9.0
+1 < Access-Control-Allow-Origin: *
+1 < Access-Control-Allow-Credentials: true
+{
+  "args": {}, 
+  "headers": {
+    "Accept-Encoding": "gzip,deflate", 
+    "Host": "httpbin.org", 
+    "User-Agent": "Apache-HttpClient/4.5.14 (Java/21.0.6)", 
+    "X-Amzn-Trace-Id": "Root=1-68edcf1d-2963ebdd73d8668b286a25c2"
+  }, 
+  "origin": "103.162.213.84", 
+  "url": "https://httpbin.org/get"
+}
+
+
+09:48:38.101 [main]  INFO  com.intuit.karate.Suite - <<pass>> feature 1 of 1 (0 remaining) test-simple.feature

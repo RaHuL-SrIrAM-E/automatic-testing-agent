@@ -541,14 +541,40 @@ ${this.generatedSteps.map(step => `  ${step}`).join('\n')}`;
     });
   }
 
-  private formatHeaders(headers: Record<string, any>): string {
-    return Object.entries(headers)
+  private formatHeaders(headers: Record<string, any> | string): string {
+    // Handle case where headers is a JSON string
+    let headersObj: Record<string, any>;
+    if (typeof headers === 'string') {
+      try {
+        headersObj = JSON.parse(headers);
+      } catch (e) {
+        console.warn('Invalid headers JSON:', headers);
+        return '';
+      }
+    } else {
+      headersObj = headers;
+    }
+    
+    return Object.entries(headersObj)
       .map(([key, value]) => `${key} = '${value}'`)
       .join('\n* header ');
   }
 
-  private formatQueryParams(params: Record<string, any>): string {
-    return Object.entries(params)
+  private formatQueryParams(params: Record<string, any> | string): string {
+    // Handle case where params is a JSON string
+    let paramsObj: Record<string, any>;
+    if (typeof params === 'string') {
+      try {
+        paramsObj = JSON.parse(params);
+      } catch (e) {
+        console.warn('Invalid query params JSON:', params);
+        return '';
+      }
+    } else {
+      paramsObj = params;
+    }
+    
+    return Object.entries(paramsObj)
       .map(([key, value]) => `${key} = '${value}'`)
       .join('\n* param ');
   }

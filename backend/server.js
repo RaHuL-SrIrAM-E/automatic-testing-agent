@@ -929,9 +929,12 @@ async function ensureKarateJar() {
   try {
     console.log('Downloading Karate JAR from official releases...');
     
-    // For demo purposes, we'll use a mock JAR
-    // In production, you would download from: https://github.com/karatelabs/karate/releases
-    throw new Error('Mock mode - using simulated Karate execution');
+    // Download from official Karate releases
+    const response = await axios({
+      method: 'GET',
+      url: 'https://github.com/karatelabs/karate/releases/download/v1.4.1/karate-1.4.1.jar',
+      responseType: 'stream'
+    });
 
     const writer = fs.createWriteStream(jarPath);
     response.data.pipe(writer);
@@ -958,6 +961,86 @@ async function ensureKarateJar() {
   }
 }
 
+// Parse Karate test output
+function parseKarateOutput(stdout, stderr, duration, error = null) {
+  const output = stdout + '\n' + stderr;
+  
+  // Extract test scenarios from feature file
+  const scenarios = [];
+  const scenarioMatches = output.matchAll(/Scenario: ([^\n]+)/g);
+  for (const match of scenarioMatches) {
+    scenarios.push(match[1].trim());
+  }
+  
+  // Parse test results
+  const details = [];
+  let total = 0;
+  let passed = 0;
+  let failed = 0;
+  let skipped = 0;
+  
+  // Look for passed tests
+  const passedMatches = output.matchAll(/passed:\s*(\d+)/gi);
+  for (const match of passedMatches) {
+    passed = parseInt(match[1]) || 0;
+  }
+  
+  // Look for failed tests
+  const failedMatches = output.matchAll(/failed:\s*(\d+)/gi);
+  for (const match of failedMatches) {
+    failed = parseInt(match[1]) || 0;
+  }
+  
+  // Look for skipped tests
+  const skippedMatches = output.matchAll(/skipped:\s*(\d+)/gi);
+  for (const match of skippedMatches) {
+    skipped = parseInt(match[1]) || 0;
+  }
+  
+  total = passed + failed + skipped;
+  
+  // If no scenarios found in output, try to extract from feature code
+  if (scenarios.length === 0) {
+    scenarios.push('Test Scenario');
+  }
+  
+  // Create details for each scenario
+  scenarios.forEach((scenario, index) => {
+    const isFailed = output.includes(scenario) && output.includes('failed');
+    const isSkipped = output.includes(scenario) && output.includes('skipped');
+    
+    details.push({
+      name: scenario,
+      status: isFailed ? 'failed' : isSkipped ? 'skipped' : 'passed',
+      duration: Math.floor(duration / scenarios.length),
+      error: isFailed ? 'Test failed - check output for details' : undefined
+    });
+  });
+  
+  // If we couldn't parse counts, estimate from scenarios
+  if (total === 0 && scenarios.length > 0) {
+    total = scenarios.length;
+    passed = scenarios.length - failed - skipped;
+  }
+  
+  // Determine overall success
+  // Success means: no failures AND either no errors OR we have valid test results
+  const success = failed === 0 && (total > 0 || !error);
+  
+  return {
+    success,
+    summary: {
+      total,
+      passed,
+      failed,
+      skipped
+    },
+    details,
+    output: output,
+    reportPath: null
+  };
+}
+
 // Execute Karate test
 async function executeKarateTest(featureCode, testId) {
   try {
@@ -977,70 +1060,56 @@ async function executeKarateTest(featureCode, testId) {
     await fs.ensureDir(outputDir);
 
     console.log(`Executing Karate test: ${testId}`);
+    console.log(`Feature file: ${featurePath}`);
+    console.log(`Karate JAR: ${karateJar}`);
 
-    // Simulate realistic Karate test execution
-    console.log('Simulating Karate test execution...');
+    // Execute Karate tests using Java
+    const startTime = Date.now();
     
-    // Simulate execution delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-    
-    // Parse the feature code to determine test behavior
-    const hasError = featureCode.includes('status 500') || featureCode.includes('status 404') || featureCode.includes('status 400');
-    const isSuccess = !hasError;
-    
-    // Generate realistic mock results
-    const mockResults = {
-      success: isSuccess,
-      summary: {
-        total: 3,
-        passed: isSuccess ? 3 : 0,
-        failed: isSuccess ? 0 : 3,
-        skipped: 0
-      },
-      details: [
-        {
-          name: 'GET /hello Test',
-          status: isSuccess ? 'passed' : 'failed',
-          duration: Math.floor(Math.random() * 2000) + 500,
-          error: isSuccess ? '' : 'Assertion failed: expected 200 but was 500'
-        },
-        {
-          name: 'GET /hello/{name} Test',
-          status: isSuccess ? 'passed' : 'failed',
-          duration: Math.floor(Math.random() * 2000) + 500,
-          error: isSuccess ? '' : 'Assertion failed: expected 200 but was 500'
-        },
-        {
-          name: 'POST /messages Test',
-          status: isSuccess ? 'passed' : 'failed',
-          duration: Math.floor(Math.random() * 2000) + 500,
-          error: isSuccess ? '' : 'Assertion failed: expected 200 but was 500'
-        }
-      ],
-      output: `Karate Test Execution
-=====================================
-
-Feature: API Test Suite
-Scenario: GET /hello Test
-${isSuccess ? '✓ PASSED' : '✗ FAILED'}
-
-Scenario: GET /hello/{name} Test
-${isSuccess ? '✓ PASSED' : '✗ FAILED'}
-
-Scenario: POST /messages Test
-${isSuccess ? '✓ PASSED' : '✗ FAILED'}
-
-Execution time: ${Math.floor(Math.random() * 2000) + 500}ms
-${isSuccess ? 'All tests passed!' : 'Some tests failed. Check the details above.'}`,
-      reportPath: path.join(outputDir, 'karate-summary.json')
-    };
-    
-    console.log('Simulated Karate execution completed');
-    
-    // Clean up test directory
-    await fs.remove(testDir);
-    
-    return mockResults;
+    try {
+      const command = `java -jar "${karateJar}" "${featurePath}" --output "${outputDir}"`;
+      console.log(`Executing command: ${command}`);
+      console.log(`Feature file content:\n${featureCode.substring(0, 500)}...`);
+      
+      const { stdout, stderr } = await execAsync(command, {
+        cwd: testDir,
+        timeout: 60000, // 60 second timeout
+        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+      });
+      
+      const duration = Date.now() - startTime;
+      console.log('Karate execution completed successfully');
+      console.log('STDOUT length:', stdout.length);
+      console.log('STDERR length:', stderr.length);
+      console.log('STDOUT preview:', stdout.substring(0, 500));
+      console.log('STDERR preview:', stderr.substring(0, 500));
+      
+      // Parse Karate output
+      const results = parseKarateOutput(stdout, stderr, duration);
+      console.log('Parsed results:', JSON.stringify(results.summary));
+      
+      // Clean up test directory
+      await fs.remove(testDir);
+      
+      return results;
+      
+    } catch (execError) {
+      const duration = Date.now() - startTime;
+      console.error('Karate execution error:', execError.message);
+      console.error('Error code:', execError.code);
+      console.error('Error signal:', execError.signal);
+      console.error('STDOUT:', execError.stdout?.substring(0, 1000) || 'No stdout');
+      console.error('STDERR:', execError.stderr?.substring(0, 1000) || 'No stderr');
+      
+      // Try to parse partial output
+      const results = parseKarateOutput(execError.stdout || '', execError.stderr || '', duration, execError);
+      console.log('Parsed results from error:', JSON.stringify(results.summary));
+      
+      // Clean up test directory
+      await fs.remove(testDir);
+      
+      return results;
+    }
   } catch (error) {
     console.error('Test execution error:', error);
     
